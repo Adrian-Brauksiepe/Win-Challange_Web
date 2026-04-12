@@ -73,7 +73,7 @@ function startApp() {
   setTimeout(() => { if (loadingEl) loadingEl.classList.add("hidden"); }, 1000);
 }
 
-// ============================================
+// ============================================ 
 // PASSWORD GATE
 // ============================================
 function checkPassword() {
