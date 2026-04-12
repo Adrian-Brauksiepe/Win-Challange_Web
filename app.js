@@ -2,26 +2,39 @@
 // app.js  –  Win Challenge Tracker Logic
 // ============================================
 
-// ---- TASKS CONFIGURATION ----
+// ============================================
+// 🔐 ADMIN PASSWORD  –  change this!
+// ============================================
+const ADMIN_PASSWORD = "win2024";
+
+// ============================================
+// 📋 TASKS CONFIGURATION
+// ============================================
+// icon: can be an emoji string like "🔥"
+//       OR a path to a PNG like "icons/mario.png"
+//       OR a full URL like "https://..."
+// ============================================
 const DEFAULT_TASKS = [
-  { id: "task_01", label: "Lorem ipsum dolor sit amet consectetur",      emoji: "🔥", checked: false },
-  { id: "task_02", label: "Adipiscing elit sed do eiusmod tempor",        emoji: "⚡", checked: false },
-  { id: "task_03", label: "Incididunt ut labore et dolore magna aliqua",  emoji: "💪", checked: false },
-  { id: "task_04", label: "Ut enim ad minim veniam quis nostrud",         emoji: "🎯", checked: false },
-  { id: "task_05", label: "Exercitation ullamco laboris nisi aliquip",    emoji: "🏋️", checked: false },
-  { id: "task_06", label: "Duis aute irure dolor in reprehenderit",       emoji: "📚", checked: false },
-  { id: "task_07", label: "Voluptate velit esse cillum dolore eu fugiat", emoji: "🧘", checked: false },
-  { id: "task_08", label: "Nulla pariatur excepteur sint occaecat",       emoji: "💧", checked: false },
-  { id: "task_09", label: "Cupidatat non proident sunt in culpa",         emoji: "🥗", checked: false },
-  { id: "task_10", label: "Qui officia deserunt mollit anim id est",      emoji: "😴", checked: false },
-  { id: "task_11", label: "Laborum perspiciatis unde omnis iste natus",   emoji: "🚶", checked: false },
-  { id: "task_12", label: "Nemo enim ipsam voluptatem quia voluptas",     emoji: "📵", checked: false },
+  { id: "task_01", label: "Lorem ipsum dolor sit amet consectetur",      icon: "🔥", checked: false },
+  { id: "task_02", label: "Adipiscing elit sed do eiusmod tempor",        icon: "⚡", checked: false },
+  { id: "task_03", label: "Incididunt ut labore et dolore magna aliqua",  icon: "💪", checked: false },
+  { id: "task_04", label: "Ut enim ad minim veniam quis nostrud",         icon: "🎯", checked: false },
+  { id: "task_05", label: "Exercitation ullamco laboris nisi aliquip",    icon: "🏋️", checked: false },
+  { id: "task_06", label: "Duis aute irure dolor in reprehenderit",       icon: "📚", checked: false },
+  { id: "task_07", label: "Voluptate velit esse cillum dolore eu fugiat", icon: "🧘", checked: false },
+  { id: "task_08", label: "Nulla pariatur excepteur sint occaecat",       icon: "💧", checked: false },
+  { id: "task_09", label: "Cupidatat non proident sunt in culpa",         icon: "🥗", checked: false },
+  { id: "task_10", label: "Qui officia deserunt mollit anim id est",      icon: "😴", checked: false },
+  { id: "task_11", label: "Laborum perspiciatis unde omnis iste natus",   icon: "🚶", checked: false },
+  { id: "task_12", label: "Nemo enim ipsam voluptatem quia voluptas",     icon: "📵", checked: false },
 ];
 
+// ---- Firestore paths ----
 const TASKS_DOC = "challenge/tasks";
 const TIMER_DOC = "challenge/timer";
 const IS_ADMIN  = window.location.pathname.includes("admin");
 
+// ---- DOM refs ----
 const timerDisplay = document.getElementById("timer-display");
 const timerSubline = document.getElementById("timer-subline");
 const taskList     = document.getElementById("task-list");
@@ -36,10 +49,58 @@ let timerStarted  = false;
 // INIT
 // ============================================
 async function init() {
-  if (IS_ADMIN) document.body.classList.add("admin-mode");
+  if (IS_ADMIN) {
+    document.body.classList.add("admin-mode");
+    // Check if already unlocked in this session
+    if (sessionStorage.getItem("adminUnlocked") === "yes") {
+      showAdminContent();
+    } else {
+      // Hide loading, show password gate
+      if (loadingEl) loadingEl.classList.add("hidden");
+      return; // Don't start Firebase yet — wait for password
+    }
+  }
+  startApp();
+}
+
+// ---- Called after password is confirmed ----
+function startApp() {
   listenToTasks();
   listenToTimer();
   setTimeout(() => { if (loadingEl) loadingEl.classList.add("hidden"); }, 1000);
+}
+
+// ============================================
+// PASSWORD GATE
+// ============================================
+function checkPassword() {
+  const input = document.getElementById("pw-input");
+  const error = document.getElementById("pw-error");
+  if (!input) return;
+
+  if (input.value === ADMIN_PASSWORD) {
+    // Correct! Save to session so refresh doesn't re-ask
+    sessionStorage.setItem("adminUnlocked", "yes");
+    showAdminContent();
+    startApp();
+  } else {
+    // Wrong password — shake the card and show error
+    error.textContent = "❌ Wrong password, try again";
+    input.value = "";
+    input.focus();
+    const card = document.querySelector(".pw-card");
+    if (card) {
+      card.classList.add("shake");
+      setTimeout(() => card.classList.remove("shake"), 500);
+    }
+  }
+}
+
+function showAdminContent() {
+  const gate    = document.getElementById("password-gate");
+  const content = document.getElementById("admin-content");
+  if (gate)    gate.style.display    = "none";
+  if (content) content.style.display = "flex";
 }
 
 // ============================================
@@ -61,6 +122,16 @@ function listenToTasks() {
   });
 }
 
+// ---- Render a task icon — supports emoji OR image path/URL ----
+function renderIcon(icon) {
+  // If it looks like a file path or URL → use an <img> tag
+  if (icon && (icon.includes("/") || icon.includes(".png") || icon.includes(".jpg") || icon.includes("http"))) {
+    return `<img class="task-img" src="${icon}" alt="icon" />`;
+  }
+  // Otherwise treat as emoji
+  return `<span class="task-emoji">${icon}</span>`;
+}
+
 function renderTasks(tasks) {
   if (!taskList) return;
   taskList.innerHTML = "";
@@ -73,6 +144,10 @@ function renderTasks(tasks) {
     const li = document.createElement("li");
     li.className = "task-item" + (task.checked ? " checked" : "");
     li.dataset.id = task.id;
+
+    // Support both old "emoji" field and new "icon" field
+    const iconHtml = renderIcon(task.icon || task.emoji || "⭐");
+
     li.innerHTML = `
       <div class="task-checkbox">
         <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
@@ -80,7 +155,7 @@ function renderTasks(tasks) {
                 stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <span class="task-emoji">${task.emoji}</span>
+      ${iconHtml}
       <span class="task-label">${task.label}</span>
     `;
     if (IS_ADMIN) li.addEventListener("click", () => toggleTask(tasks, task.id));
@@ -116,32 +191,22 @@ async function checkAll() {
 // ============================================
 // TIMER  –  COUNTDOWN
 // ============================================
-// Firestore stores: { startMs, durationMs, running }
-//   startMs    = real clock time the timer was launched
-//   durationMs = total length of the challenge in ms (e.g. 72h)
-//   remaining  = durationMs - (now - startMs)
-// ============================================
-
 function listenToTimer() {
   db.doc(TIMER_DOC).onSnapshot((snap) => {
     stopLocalTimer();
-
     if (!snap.exists) {
       if (timerDisplay) timerDisplay.textContent = "--:--:--";
       if (timerSubline) timerSubline.textContent = "Admin has not started the timer yet";
       return;
     }
-
     const { startMs, durationMs, running } = snap.data();
-
     if (!running) {
-      const elapsed    = startMs ? Date.now() - startMs : 0;
-      const remaining  = Math.max(0, durationMs - elapsed);
+      const elapsed   = startMs ? Date.now() - startMs : 0;
+      const remaining = Math.max(0, durationMs - elapsed);
       updateTimerDisplay(Math.floor(remaining / 1000), durationMs);
       if (timerSubline) timerSubline.textContent = "Timer paused";
       return;
     }
-
     startLocalCountdown(startMs, durationMs);
   }, (err) => console.error("Timer snapshot error:", err));
 }
@@ -149,14 +214,12 @@ function listenToTimer() {
 function startLocalCountdown(startMs, durationMs) {
   if (timerStarted) return;
   timerStarted = true;
-
   function tick() {
     const elapsed   = Date.now() - startMs;
     const remaining = Math.max(0, durationMs - elapsed);
     updateTimerDisplay(Math.floor(remaining / 1000), durationMs);
     if (remaining <= 0) stopLocalTimer();
   }
-
   tick();
   timerInterval = setInterval(tick, 1000);
 }
@@ -172,51 +235,42 @@ function updateTimerDisplay(totalSeconds, durationMs) {
   const m   = Math.floor((totalSeconds % 3600) / 60);
   const s   = totalSeconds % 60;
   const pad = n => String(n).padStart(2, "0");
-
   if (timerDisplay) timerDisplay.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
-
   if (timerSubline) {
     if (totalSeconds <= 0) {
-      timerSubline.textContent  = "🏁 Time's up!";
-      timerSubline.style.color  = "var(--accent2)";
+      timerSubline.textContent = "🏁 Time's up!";
+      timerSubline.style.color = "var(--accent2)";
     } else {
       const totalH = Math.round(durationMs / 3600000);
-      timerSubline.textContent  = `${totalH}h challenge · counting down`;
-      timerSubline.style.color  = "";
+      timerSubline.textContent = `${totalH}h challenge · counting down`;
+      timerSubline.style.color = "";
     }
   }
 }
 
-// ---- Admin: launch countdown ----
 async function launchTimer() {
   const h = parseInt(document.getElementById("dur-h")?.value || 0, 10) || 0;
   const m = parseInt(document.getElementById("dur-m")?.value || 0, 10) || 0;
   const durationMs = (h * 3600 + m * 60) * 1000;
   if (durationMs <= 0) { showToast("⚠️ Set a duration first!"); return; }
-
   const label = `${h > 0 ? h + "h " : ""}${m > 0 ? m + "m" : ""}`.trim();
   if (!confirm(`Start a ${label} countdown for everyone?`)) return;
-
   stopLocalTimer();
   await db.doc(TIMER_DOC).set({ startMs: Date.now(), durationMs, running: true });
   showToast(`⏱ ${label} countdown started!`);
 }
 
-// ---- Admin: stop timer ----
 async function stopTimer() {
   if (!confirm("Pause the timer for all viewers?")) return;
   stopLocalTimer();
   const snap = await db.doc(TIMER_DOC).get();
   if (!snap.exists) return;
   const { startMs, durationMs } = snap.data();
-  // Save elapsed so resume works correctly
-  const elapsed    = Date.now() - startMs;
-  // Store startMs offset so remaining = durationMs - elapsed is preserved
+  const elapsed = Date.now() - startMs;
   await db.doc(TIMER_DOC).set({ startMs: Date.now() - elapsed, durationMs, running: false });
   showToast("⏸ Timer paused");
 }
 
-// ---- Admin: resume timer ----
 async function resumeTimer() {
   const snap = await db.doc(TIMER_DOC).get();
   if (!snap.exists) { showToast("Launch a timer first"); return; }
@@ -225,7 +279,6 @@ async function resumeTimer() {
   showToast("▶️ Timer resumed");
 }
 
-// ---- Admin: wipe timer ----
 async function resetTimer() {
   if (!confirm("Clear the timer completely? This cannot be undone.")) return;
   stopLocalTimer();

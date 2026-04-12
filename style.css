@@ -502,3 +502,106 @@ header {
   .task-item { padding: 14px 16px; }
   .checklist-header { padding: 14px 16px; }
 }
+
+/* ============================================
+   PASSWORD GATE
+   ============================================ */
+#password-gate {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 998;
+  padding: 24px;
+}
+
+.pw-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* gold top line */
+.pw-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+.pw-icon {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+}
+
+.pw-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.pw-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.pw-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pw-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pw-input:focus { border-color: var(--accent); }
+
+.pw-error {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: #e05050;
+  min-height: 18px;
+}
+
+/* shake animation for wrong password */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+.shake { animation: shake 0.45s ease; }
+
+/* ============================================
+   TASK PNG IMAGE ICON
+   ============================================ */
+.task-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
