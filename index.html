@@ -20,7 +20,7 @@
       <span class="pulse-dot"></span>
       Live Viewer
     </div>
-    <h1 class="brand">Win Challenge</h1>
+    <h1 class="brand" id="brand-logo" onclick="secretAdminClick()">Win Challenge</h1>
     <p class="subtitle">Track every victory</p>
   </header>
 
@@ -69,5 +69,20 @@
   <!-- Our config & logic -->
   <script src="firebase.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Secret: click the logo 3 times within 1.5 seconds → go to admin page
+    let _clicks = 0, _clickTimer;
+    function secretAdminClick() {
+      _clicks++;
+      clearTimeout(_clickTimer);
+      if (_clicks >= 3) {
+        _clicks = 0;
+        window.location.href = "admin.html";
+      } else {
+        // Reset counter if 1.5 seconds pass with no further clicks
+        _clickTimer = setTimeout(() => { _clicks = 0; }, 1500);
+      }
+    }
+  </script>
 </body>
 </html>
