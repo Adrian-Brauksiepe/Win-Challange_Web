@@ -13,7 +13,7 @@ const ADMIN_PASSWORD = "Monk";
 // icon: can be an emoji string like "🔥"
 //       OR a path to a PNG like "icons/mario.png"
 //       OR a full URL like "https://..."
-// ============================================
+// ============================================ 
 const DEFAULT_TASKS = [
   { id: "task_01", label: "MC Durchspielen Sub 1H",      icon: "🔥", checked: false },
   { id: "task_02", label: "MC Master builders Win b2b",        icon: "⚡", checked: false },
