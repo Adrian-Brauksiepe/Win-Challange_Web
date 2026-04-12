@@ -15,10 +15,10 @@ const ADMIN_PASSWORD = "Monk";
 //       OR a full URL like "https://..."
 // ============================================ 
 const DEFAULT_TASKS = [
-  { id: "task_01", label: "MC Durchspielen Sub 1H",      icon: "🔥", checked: false },
-  { id: "task_02", label: "MC Master builders Win b2b",        icon: "⚡", checked: false },
-  { id: "task_03", label: "MC Masterbuilders Win b2b",  icon: "💪", checked: false },
-  { id: "task_04", label: "MC Bedwars Win b2b",         icon: "🎯", checked: false },
+  { id: "task_01", label: "MC Durchspielen Sub 1H",      icon: "icons/MC.png", checked: false },
+  { id: "task_02", label: "MC Master builders Win b2b",        icon: "icons/MC.png", checked: false },
+  { id: "task_03", label: "MC Masterbuilders Win b2b",  icon: "icons/MC.png", checked: false },
+  { id: "task_04", label: "MC Bedwars Win b2b",         icon: "icons/MC.png", checked: false },
   { id: "task_05", label: "League of Legends Win b2b",    icon: "🏋️", checked: false },
   { id: "task_06", label: "Overwatch Win b2b",       icon: "📚", checked: false },
   { id: "task_07", label: "CSGO Win b2b", icon: "🧘", checked: false },
