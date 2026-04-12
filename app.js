@@ -5,7 +5,7 @@
 // ============================================
 // 🔐 ADMIN PASSWORD  –  change this!
 // ============================================
-const ADMIN_PASSWORD = "win2024";
+const ADMIN_PASSWORD = "Monk";
 
 // ============================================
 // 📋 TASKS CONFIGURATION
@@ -15,18 +15,21 @@ const ADMIN_PASSWORD = "win2024";
 //       OR a full URL like "https://..."
 // ============================================
 const DEFAULT_TASKS = [
-  { id: "task_01", label: "Lorem ipsum dolor sit amet consectetur",      icon: "🔥", checked: false },
-  { id: "task_02", label: "Adipiscing elit sed do eiusmod tempor",        icon: "⚡", checked: false },
-  { id: "task_03", label: "Incididunt ut labore et dolore magna aliqua",  icon: "💪", checked: false },
-  { id: "task_04", label: "Ut enim ad minim veniam quis nostrud",         icon: "🎯", checked: false },
-  { id: "task_05", label: "Exercitation ullamco laboris nisi aliquip",    icon: "🏋️", checked: false },
-  { id: "task_06", label: "Duis aute irure dolor in reprehenderit",       icon: "📚", checked: false },
-  { id: "task_07", label: "Voluptate velit esse cillum dolore eu fugiat", icon: "🧘", checked: false },
-  { id: "task_08", label: "Nulla pariatur excepteur sint occaecat",       icon: "💧", checked: false },
-  { id: "task_09", label: "Cupidatat non proident sunt in culpa",         icon: "🥗", checked: false },
-  { id: "task_10", label: "Qui officia deserunt mollit anim id est",      icon: "😴", checked: false },
-  { id: "task_11", label: "Laborum perspiciatis unde omnis iste natus",   icon: "🚶", checked: false },
-  { id: "task_12", label: "Nemo enim ipsam voluptatem quia voluptas",     icon: "📵", checked: false },
+  { id: "task_01", label: "MC Durchspielen Sub 1H",      icon: "🔥", checked: false },
+  { id: "task_02", label: "MC Master builders Win b2b",        icon: "⚡", checked: false },
+  { id: "task_03", label: "MC Masterbuilders Win b2b",  icon: "💪", checked: false },
+  { id: "task_04", label: "MC Bedwars Win b2b",         icon: "🎯", checked: false },
+  { id: "task_05", label: "League of Legends Win b2b",    icon: "🏋️", checked: false },
+  { id: "task_06", label: "Overwatch Win b2b",       icon: "📚", checked: false },
+  { id: "task_07", label: "CSGO Win b2b", icon: "🧘", checked: false },
+  { id: "task_08", label: "Rocket League Win b2b",       icon: "💧", checked: false },
+  { id: "task_09", label: "Fortnite Epic Win",         icon: "🥗", checked: false },
+  { id: "task_10", label: "Higher Lower 35p",      icon: "😴", checked: false },
+  { id: "task_11", label: "Eraser 50%",   icon: "🚶", checked: false },
+  { id: "task_12", label: "Fallguys Win",     icon: "📵", checked: false },
+  { id: "task_13", label: "Rainbow 6 Win",     icon: "📵", checked: false },
+  { id: "task_14", label: "Valorant Win b2b",     icon: "📵", checked: false },
+  { id: "task_15", label: "Unrailed 1000m",     icon: "📵", checked: false },
 ];
 
 // ---- Firestore paths ----
