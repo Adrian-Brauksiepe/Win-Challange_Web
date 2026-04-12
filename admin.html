@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Win Challenge Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ════ LOADING ════ -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Connecting...</p>
+  </div>
+
+  <!-- ════ HEADER ════ -->
+  <header>
+    <div class="viewer-badge admin-badge">🔑 Admin Panel</div>
+    <h1 class="brand">Win Challenge</h1>
+    <p class="subtitle">Admin Controls</p>
+  </header>
+
+  <!-- ════ TIMER SETUP CARD ════ -->
+  <div class="admin-controls">
+
+    <!-- Section: Launch countdown -->
+    <h3>⏱ Countdown Timer</h3>
+    <p class="admin-hint">Set the challenge duration and press Launch to start the countdown for everyone.</p>
+
+    <div class="timer-launch-row">
+      <!-- Hours input -->
+      <div class="dur-field">
+        <input id="dur-h" class="time-input" type="number" min="0" max="999"
+               placeholder="0" value="72" />
+        <span class="dur-label">hours</span>
+      </div>
+      <span class="time-sep">:</span>
+      <!-- Minutes input -->
+      <div class="dur-field">
+        <input id="dur-m" class="time-input" type="number" min="0" max="59"
+               placeholder="0" value="0" />
+        <span class="dur-label">min</span>
+      </div>
+      <button class="btn btn-launch" onclick="launchTimer()">🚀 Launch</button>
+    </div>
+
+    <!-- Quick presets -->
+    <div class="preset-row">
+      <span class="preset-label">Quick:</span>
+      <button class="btn-preset" onclick="setPreset(24,0)">24h</button>
+      <button class="btn-preset" onclick="setPreset(48,0)">48h</button>
+      <button class="btn-preset" onclick="setPreset(72,0)">72h</button>
+      <button class="btn-preset" onclick="setPreset(168,0)">7 days</button>
+      <button class="btn-preset" onclick="setPreset(0,5)">5 min (test)</button>
+    </div>
+
+    <!-- Running controls -->
+    <div class="admin-btn-row" style="margin-top:14px;">
+      <button class="btn btn-secondary" onclick="resumeTimer()">▶️ Resume</button>
+      <button class="btn btn-secondary" onclick="stopTimer()">⏸ Pause</button>
+      <button class="btn btn-danger"    onclick="resetTimer()">🗑 Clear Timer</button>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- Section: Task controls -->
+    <h3>📋 Task Controls</h3>
+    <div class="admin-btn-row">
+      <button class="btn btn-primary" onclick="checkAll()">✅ Check All</button>
+      <button class="btn btn-danger"  onclick="resetTasks()">🔄 Uncheck All</button>
+    </div>
+
+  </div>
+
+  <!-- ════ TIMER DISPLAY ════ -->
+  <div class="timer-card">
+    <p class="timer-label">⏱ Remaining Time</p>
+    <div id="timer-display">--:--:--</div>
+    <div class="timer-status">
+      <span class="pulse-dot"></span>
+      <span id="timer-subline">Set a duration above and press Launch</span>
+    </div>
+  </div>
+
+  <!-- ════ CHECKLIST ════ -->
+  <div class="checklist-card">
+    <div class="checklist-header">
+      <span class="checklist-title">Challenge Tasks</span>
+      <span id="progress-text" class="progress-text">0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div id="progress-fill" class="progress-bar-fill" style="width:0%"></div>
+    </div>
+    <ul id="task-list" class="task-list"></ul>
+  </div>
+
+  <!-- ════ STATUS BAR ════ -->
+  <div class="status-bar">
+    <span class="status-badge" style="color:var(--accent2)">
+      🔑 Click any task to toggle it
+    </span>
+    <button class="btn-mini" onclick="openMiniMode()">🪟 Mini Mode</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Quick-preset helper – fills the hour/min inputs
+    function setPreset(h, m) {
+      document.getElementById("dur-h").value = h;
+      document.getElementById("dur-m").value = m;
+    }
+  </script>
+</body>
+</html>

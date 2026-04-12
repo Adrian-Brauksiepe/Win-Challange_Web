@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Win Challenge Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ════ LOADING SCREEN ════ -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Connecting...</p>
+  </div>
+
+  <!-- ════ HEADER ════ -->
+  <header>
+    <div class="viewer-badge">
+      <span class="pulse-dot"></span>
+      Live Viewer
+    </div>
+    <h1 class="brand">Win Challenge</h1>
+    <p class="subtitle">Track every victory</p>
+  </header>
+
+  <!-- ════ TIMER CARD ════ -->
+  <div class="timer-card">
+    <p class="timer-label">⏱ Remaining Time</p>
+    <div id="timer-display">00:00:00</div>
+    <div class="timer-status">
+      <span class="pulse-dot"></span>
+      <span id="timer-subline">Connecting…</span>
+    </div>
+  </div>
+
+  <!-- ════ CHECKLIST CARD ════ -->
+  <div class="checklist-card">
+    <div class="checklist-header">
+      <span class="checklist-title">Today's Tasks</span>
+      <span id="progress-text" class="progress-text">0 / 0</span>
+    </div>
+    <!-- Progress bar -->
+    <div class="progress-bar-wrap">
+      <div id="progress-fill" class="progress-bar-fill" style="width:0%"></div>
+    </div>
+    <!-- Tasks injected here by JS -->
+    <ul id="task-list" class="task-list"></ul>
+  </div>
+
+  <!-- ════ STATUS BAR ════ -->
+  <div class="status-bar">
+    <span class="status-badge">
+      <span class="pulse-dot"></span>
+      Read-only view
+    </span>
+    <button class="btn-mini" onclick="openMiniMode()">
+      🪟 Mini Mode
+    </button>
+  </div>
+
+  <!-- ════ TOAST ════ -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Firebase SDK (v8 compat – works without build tools) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Our config & logic -->
+  <script src="firebase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
