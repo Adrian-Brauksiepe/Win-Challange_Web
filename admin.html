@@ -14,7 +14,7 @@
     <p>Connecting...</p>
   </div>
 
-  <!-- ════ PASSWORD GATE (shown first, hides everything else) ════ -->
+  <!-- ════ ADMIN PASSWORD GATE ════ -->
   <div id="password-gate">
     <div class="pw-card">
       <div class="pw-icon">🔑</div>
@@ -26,29 +26,56 @@
           type="password"
           class="pw-input"
           placeholder="Password..."
-          onkeydown="if(event.key==='Enter') checkPassword()"
+          onkeydown="if(event.key==='Enter') checkAdminPassword()"
           autofocus
         />
-        <button class="btn btn-launch" onclick="checkPassword()">Enter</button>
+        <button class="btn btn-launch" onclick="checkAdminPassword()">Enter</button>
       </div>
       <p id="pw-error" class="pw-error"></p>
     </div>
   </div>
 
-  <!-- ════ ADMIN CONTENT (hidden until correct password) ════ -->
-  <div id="admin-content" style="display:none; width:100%; display:none; flex-direction:column; align-items:center;">
+  <!-- ════ ADMIN CONTENT ════ -->
+  <div id="admin-content" style="display:none; width:100%; flex-direction:column; align-items:center;">
 
-    <!-- ════ HEADER ════ -->
+    <!-- Header -->
     <header>
       <div class="viewer-badge admin-badge">🔑 Admin Panel</div>
       <h1 class="brand">Win Challenge</h1>
       <p class="subtitle">Admin Controls</p>
     </header>
 
-    <!-- ════ TIMER SETUP CARD ════ -->
+    <!-- ══ SECTION 1: Launch Date ══ -->
     <div class="admin-controls">
+      <h3>🗓 Website Launch Date</h3>
+      <p class="admin-hint">
+        Visitors will see a countdown until this date/time. Set it and save — the site opens automatically when the time arrives. Leave blank to disable the countdown and show the site immediately.
+      </p>
+      <div class="launch-date-row">
+        <input id="launch-date-input" type="datetime-local" class="date-input" />
+        <button class="btn btn-launch" onclick="saveLaunchDate()">💾 Save</button>
+        <button class="btn btn-danger"  onclick="clearLaunchDate()">✕ Clear</button>
+      </div>
+      <p id="launch-date-status" class="admin-hint" style="margin-top:8px;"></p>
 
-      <h3>⏱ Countdown Timer</h3>
+      <div class="divider"></div>
+
+      <!-- ══ Viewer password ══ -->
+      <h3>🔓 Early-Access Password</h3>
+      <p class="admin-hint">
+        Viewers can enter this password to skip the countdown and access the site early. Leave blank to disable early-access.
+      </p>
+      <div class="launch-date-row">
+        <input id="viewer-pw-set" type="text" class="pw-input" style="max-width:220px"
+               placeholder="e.g. earlybird" />
+        <button class="btn btn-launch" onclick="saveViewerPassword()">💾 Save</button>
+      </div>
+      <p id="viewer-pw-status" class="admin-hint" style="margin-top:8px;"></p>
+    </div>
+
+    <!-- ══ SECTION 2: Countdown Timer ══ -->
+    <div class="admin-controls">
+      <h3>⏱ Challenge Countdown Timer</h3>
       <p class="admin-hint">Set the challenge duration and press Launch to start the countdown for everyone.</p>
 
       <div class="timer-launch-row">
@@ -78,18 +105,33 @@
         <button class="btn btn-secondary" onclick="stopTimer()">⏸ Pause</button>
         <button class="btn btn-danger"    onclick="resetTimer()">🗑 Clear Timer</button>
       </div>
+    </div>
+
+    <!-- ══ SECTION 3: Task Editor ══ -->
+    <div class="admin-controls">
+      <h3>✏️ Edit Tasks</h3>
+      <p class="admin-hint">
+        Change the label or icon for any task. Icon can be an emoji (🔥) or a path to an image file (icons/mario.png).
+        Press <strong>Save All Tasks</strong> when done.
+      </p>
+      <!-- Task rows injected here by JS -->
+      <div id="task-editor-list"></div>
+      <div class="admin-btn-row" style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="saveEditedTasks()">💾 Save All Tasks</button>
+        <button class="btn btn-secondary" onclick="addNewTask()">＋ Add Task</button>
+      </div>
 
       <div class="divider"></div>
 
-      <h3>📋 Task Controls</h3>
+      <!-- Quick bulk controls -->
+      <h3>📋 Quick Controls</h3>
       <div class="admin-btn-row">
         <button class="btn btn-primary" onclick="checkAll()">✅ Check All</button>
         <button class="btn btn-danger"  onclick="resetTasks()">🔄 Uncheck All</button>
       </div>
-
     </div>
 
-    <!-- ════ TIMER DISPLAY ════ -->
+    <!-- ══ Timer display ══ -->
     <div class="timer-card">
       <p class="timer-label">⏱ Remaining Time</p>
       <div id="timer-display">--:--:--</div>
@@ -99,7 +141,7 @@
       </div>
     </div>
 
-    <!-- ════ CHECKLIST ════ -->
+    <!-- ══ Live checklist preview ══ -->
     <div class="checklist-card">
       <div class="checklist-header">
         <span class="checklist-title">Challenge Tasks</span>
@@ -111,11 +153,9 @@
       <ul id="task-list" class="task-list"></ul>
     </div>
 
-    <!-- ════ STATUS BAR ════ -->
+    <!-- Status bar -->
     <div class="status-bar">
-      <span class="status-badge" style="color:var(--accent2)">
-        🔑 Click any task to toggle it
-      </span>
+      <span class="status-badge" style="color:var(--accent2)">🔑 Click any task to toggle it</span>
       <button class="btn-mini" onclick="openMiniMode()">🪟 Mini Mode</button>
     </div>
 

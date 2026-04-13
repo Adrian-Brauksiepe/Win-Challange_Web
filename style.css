@@ -56,6 +56,8 @@ header {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  cursor: pointer;
+  user-select: none;
 }
 
 .subtitle {
@@ -604,4 +606,279 @@ header {
   object-fit: contain;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+/* ============================================
+   LAUNCH COUNTDOWN OVERLAY  (viewer page)
+   ============================================ */
+#launch-overlay {
+  display: none; /* shown by JS via .active class */
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 990;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transition: opacity 0.6s;
+}
+
+#launch-overlay.active {
+  display: flex;
+}
+
+#launch-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.launch-card {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.launch-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.launch-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 12vw, 5.5rem);
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.launch-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+/* DD:HH:MM:SS segments */
+.launch-countdown {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.cd-seg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cd-seg span:first-child {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 72px;
+  text-align: center;
+  line-height: 1;
+}
+
+.cd-label {
+  font-size: 0.62rem !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted) !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  min-width: unset !important;
+}
+
+.cd-colon {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  color: var(--text-muted);
+  padding-top: 8px;
+  line-height: 1;
+}
+
+/* Early-access password section */
+.launch-pw-section {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+
+.launch-pw-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ============================================
+   LAUNCH DATE INPUT  (admin panel)
+   ============================================ */
+.launch-date-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.date-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 9px 12px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+  flex: 1;
+  min-width: 200px;
+}
+
+.date-input:focus { border-color: var(--accent); }
+
+/* datetime-local calendar icon color fix for dark theme */
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+/* ============================================
+   TASK EDITOR  (admin panel)
+   ============================================ */
+#task-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color 0.15s;
+}
+
+.task-editor-row:focus-within {
+  border-color: var(--accent);
+}
+
+.task-editor-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--text-muted);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Icon preview + input stacked */
+.task-editor-icon-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.task-editor-icon-preview {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.task-editor-icon-preview img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.task-editor-icon-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  width: 110px;
+  outline: none;
+  text-align: center;
+}
+
+.task-editor-icon-input:focus { border-color: var(--accent); }
+
+/* Label input takes remaining space */
+.task-editor-label-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.task-editor-label-input:focus { border-color: var(--accent); }
+
+/* Remove row button */
+.task-editor-remove {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.task-editor-remove:hover {
+  background: rgba(224, 80, 80, 0.12);
+  border-color: #e05050;
+  color: #e05050;
+}
+
+/* Responsive: stack icon wrap on small screens */
+@media (max-width: 480px) {
+  .task-editor-icon-input { width: 80px; }
+  .task-editor-row { flex-wrap: wrap; }
+  .task-editor-label-input { min-width: 100%; }
 }

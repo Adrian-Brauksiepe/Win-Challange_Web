@@ -14,63 +14,102 @@
     <p>Connecting...</p>
   </div>
 
-  <!-- ════ HEADER ════ -->
-  <header>
-    <div class="viewer-badge">
-      <span class="pulse-dot"></span>
-      Live Viewer
-    </div>
-    <h1 class="brand" id="brand-logo" onclick="secretAdminClick()">Win Challenge</h1>
-    <p class="subtitle">Track every victory</p>
-  </header>
+  <!-- ════ LAUNCH COUNTDOWN OVERLAY ════
+       Shown when the launch date hasn't arrived yet.
+       Hides automatically when time runs out, or
+       when the viewer enters the correct early-access password. -->
+  <div id="launch-overlay">
+    <div class="launch-card">
 
-  <!-- ════ TIMER CARD ════ -->
-  <div class="timer-card">
-    <p class="timer-label">⏱ Remaining Time</p>
-    <div id="timer-display">00:00:00</div>
-    <div class="timer-status">
-      <span class="pulse-dot"></span>
-      <span id="timer-subline">Connecting…</span>
+      <p class="launch-eyebrow">Something is coming</p>
+      <h2 class="launch-title">WIN CHALLENGE</h2>
+      <p class="launch-sub" id="launch-sub">Challenge starts in</p>
+
+      <!-- Countdown segments: DD · HH · MM · SS -->
+      <div class="launch-countdown">
+        <div class="cd-seg"><span id="cd-days">--</span><span class="cd-label">days</span></div>
+        <span class="cd-colon">:</span>
+        <div class="cd-seg"><span id="cd-hours">--</span><span class="cd-label">hours</span></div>
+        <span class="cd-colon">:</span>
+        <div class="cd-seg"><span id="cd-mins">--</span><span class="cd-label">min</span></div>
+        <span class="cd-colon">:</span>
+        <div class="cd-seg"><span id="cd-secs">--</span><span class="cd-label">sec</span></div>
+      </div>
+
+      <!-- Early-access password -->
+      <div class="launch-pw-section">
+        <p class="launch-pw-label">Have early access? Enter password:</p>
+        <div class="pw-input-row">
+          <input
+            id="viewer-pw-input"
+            type="password"
+            class="pw-input"
+            placeholder="Password..."
+            onkeydown="if(event.key==='Enter') checkViewerPassword()"
+          />
+          <button class="btn btn-launch" onclick="checkViewerPassword()">Unlock</button>
+        </div>
+        <p id="viewer-pw-error" class="pw-error"></p>
+      </div>
+
     </div>
   </div>
+  <!-- end launch overlay -->
 
-  <!-- ════ CHECKLIST CARD ════ -->
-  <div class="checklist-card">
-    <div class="checklist-header">
-      <span class="checklist-title">Today's Tasks</span>
-      <span id="progress-text" class="progress-text">0 / 0</span>
+  <!-- ════ MAIN CONTENT (always in DOM, shown once unlocked) ════ -->
+  <div id="main-content">
+
+    <!-- ════ HEADER ════ -->
+    <header>
+      <div class="viewer-badge">
+        <span class="pulse-dot"></span>
+        Live Viewer
+      </div>
+      <h1 class="brand" id="brand-logo" onclick="secretAdminClick()">Win Challenge</h1>
+      <p class="subtitle">Track every victory</p>
+    </header>
+
+    <!-- ════ TIMER CARD ════ -->
+    <div class="timer-card">
+      <p class="timer-label">⏱ Remaining Time</p>
+      <div id="timer-display">--:--:--</div>
+      <div class="timer-status">
+        <span class="pulse-dot"></span>
+        <span id="timer-subline">Connecting…</span>
+      </div>
     </div>
-    <!-- Progress bar -->
-    <div class="progress-bar-wrap">
-      <div id="progress-fill" class="progress-bar-fill" style="width:0%"></div>
+
+    <!-- ════ CHECKLIST CARD ════ -->
+    <div class="checklist-card">
+      <div class="checklist-header">
+        <span class="checklist-title">Today's Tasks</span>
+        <span id="progress-text" class="progress-text">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div id="progress-fill" class="progress-bar-fill" style="width:0%"></div>
+      </div>
+      <ul id="task-list" class="task-list"></ul>
     </div>
-    <!-- Tasks injected here by JS -->
-    <ul id="task-list" class="task-list"></ul>
-  </div>
 
-  <!-- ════ STATUS BAR ════ -->
-  <div class="status-bar">
-    <span class="status-badge">
-      <span class="pulse-dot"></span>
-      Read-only view
-    </span>
-    <button class="btn-mini" onclick="openMiniMode()">
-      🪟 Mini Mode
-    </button>
-  </div>
+    <!-- ════ STATUS BAR ════ -->
+    <div class="status-bar">
+      <span class="status-badge">
+        <span class="pulse-dot"></span>
+        Read-only view
+      </span>
+      <button class="btn-mini" onclick="openMiniMode()">🪟 Mini Mode</button>
+    </div>
 
-  <!-- ════ TOAST ════ -->
+  </div><!-- end #main-content -->
+
   <div id="toast" class="toast"></div>
 
-  <!-- Firebase SDK (v8 compat – works without build tools) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-  <!-- Our config & logic -->
   <script src="firebase.js"></script>
   <script src="app.js"></script>
   <script>
-    // Secret: click the logo 3 times within 1.5 seconds → go to admin page
+    // Secret: triple-click logo → go to admin page
     let _clicks = 0, _clickTimer;
     function secretAdminClick() {
       _clicks++;
@@ -79,7 +118,6 @@
         _clicks = 0;
         window.location.href = "admin.html";
       } else {
-        // Reset counter if 1.5 seconds pass with no further clicks
         _clickTimer = setTimeout(() => { _clicks = 0; }, 1500);
       }
     }
