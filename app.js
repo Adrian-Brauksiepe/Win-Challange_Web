@@ -5,7 +5,7 @@
 // ============================================
 // 🔐 PASSWORDS  –  change these!
 // ============================================
-const ADMIN_PASSWORD = "win2024";       // Admin panel password
+const ADMIN_PASSWORD = "winmonk2026";       // Admin panel password
 // Viewer early-access password is stored in Firestore (set via admin panel)
 
 // ============================================
