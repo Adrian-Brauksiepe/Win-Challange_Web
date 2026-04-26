@@ -1,11 +1,8 @@
 /* ============================================
-   WIN CHALLENGE TRACKER - Global Styles
+   WIN CHALLENGE TRACKER – Global Styles
    ============================================ */
-
-/* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
 
-/* CSS Variables - our color palette */
 :root {
   --bg:        #0d0f12;
   --surface:   #161a20;
@@ -20,7 +17,6 @@
   --shadow:    0 4px 24px rgba(0,0,0,0.5);
 }
 
-/* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -32,14 +28,36 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 24px 16px 48px;
-  /* subtle noise texture */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ---- Background canvas (stars) ---- */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---- Confetti canvas ---- */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+
+/* All main content sits above canvas */
+header, .timer-card, .total-time-card, .checklist-card,
+.admin-controls, .status-bar, #launch-overlay,
+#password-gate, #loading, .toast {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---- Header ---- */
 header {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
@@ -70,19 +88,18 @@ header {
 /* ---- Timer Card ---- */
 .timer-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px 20px 20px;
   text-align: center;
   box-shadow: var(--shadow);
-  margin: 16px 0;
+  margin: 16px 0 8px;
   position: relative;
   overflow: hidden;
 }
 
-/* decorative accent line at top */
 .timer-card::before {
   content: '';
   position: absolute;
@@ -123,6 +140,7 @@ header {
   border-radius: 50%;
   background: var(--success);
   animation: pulse 1.6s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
@@ -130,10 +148,39 @@ header {
   50%       { opacity: 0.4; transform: scale(0.7); }
 }
 
+/* ---- Total Time Card ---- */
+.total-time-card {
+  width: 100%;
+  max-width: 600px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.total-time-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.total-time-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  color: var(--success);
+}
+
 /* ---- Checklist Card ---- */
 .checklist-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -156,45 +203,28 @@ header {
   color: var(--text-muted);
 }
 
-.progress-text {
-  font-size: 0.78rem;
-  color: var(--accent);
-  font-weight: 600;
-}
+.progress-text { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
 
-/* Progress bar */
-.progress-bar-wrap {
-  height: 3px;
-  background: var(--surface2);
-}
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--success));
-  transition: width 0.5s ease;
-}
+.progress-bar-wrap { height: 3px; background: var(--surface2); }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width 0.5s ease; }
 
 /* ---- Task Items ---- */
-.task-list {
-  list-style: none;
-}
+.task-list { list-style: none; }
 
 .task-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border);
   transition: background 0.15s;
-  cursor: default;
+  position: relative;
 }
 
 .task-item:last-child { border-bottom: none; }
-
-/* Admin gets pointer cursor on items */
-.admin-mode .task-item { cursor: pointer; }
 .admin-mode .task-item:hover { background: var(--surface2); }
 
-/* Custom checkbox */
+/* Checkbox */
 .task-checkbox {
   width: 22px; height: 22px;
   border-radius: 6px;
@@ -202,37 +232,91 @@ header {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: all 0.2s;
-  background: transparent;
 }
 
-.task-item.checked .task-checkbox {
-  background: var(--success);
-  border-color: var(--success);
-}
-
+.task-item.checked .task-checkbox { background: var(--success); border-color: var(--success); }
 .task-checkbox svg { opacity: 0; transform: scale(0.5); transition: all 0.2s; }
 .task-item.checked .task-checkbox svg { opacity: 1; transform: scale(1); }
 
-/* Task label */
-.task-label {
-  font-size: 1rem;
-  font-weight: 500;
-  flex: 1;
-  transition: all 0.2s;
+/* Label */
+.task-label { font-size: 0.92rem; font-weight: 500; flex: 1; transition: all 0.2s; min-width: 0; }
+.task-item.checked .task-label { text-decoration: line-through; color: var(--text-muted); }
+
+/* Emoji / image icon */
+.task-emoji { font-size: 1.15rem; flex-shrink: 0; }
+.task-img   { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; flex-shrink: 0; }
+
+/* Tooltip anchor (ℹ️ icon) */
+.tooltip-anchor {
+  font-size: 0.85rem;
+  cursor: help;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  user-select: none;
+}
+.tooltip-anchor:hover { opacity: 1; }
+
+/* ---- Task Timer group ---- */
+.task-timer-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 76px;
 }
 
-.task-item.checked .task-label {
-  text-decoration: line-through;
+.task-timer-display {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 
-/* Task emoji */
-.task-emoji { font-size: 1.2rem; }
+.task-timer-btns { display: flex; gap: 4px; }
+
+.ttbtn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.ttbtn:hover { border-color: var(--accent); color: var(--accent); }
+.ttbtn-start.active { border-color: var(--success); color: var(--success); background: rgba(72,199,116,0.08); }
+.ttbtn-reset:hover  { border-color: #e05050; color: #e05050; }
+
+/* ---- Floating tooltip ---- */
+.tooltip {
+  position: fixed;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 600;
+  opacity: 0;
+  transition: opacity 0.15s;
+  max-width: 240px;
+  white-space: normal;
+  box-shadow: var(--shadow);
+}
+
+.tooltip.visible { opacity: 1; }
 
 /* ---- Status Bar ---- */
 .status-bar {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   margin-top: 12px;
   display: flex;
   align-items: center;
@@ -262,20 +346,17 @@ header {
   display: flex; align-items: center; gap: 6px;
 }
 
-.btn-mini:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.btn-mini:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---- Admin Controls ---- */
 .admin-controls {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 20px;
-  margin: 16px 0;
+  padding: 18px 20px;
+  margin: 8px 0;
 }
 
 .admin-controls h3 {
@@ -283,12 +364,12 @@ header {
   font-size: 1rem;
   letter-spacing: 0.15em;
   color: var(--accent2);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.admin-btn-row {
-  display: flex; gap: 10px; flex-wrap: wrap;
-}
+.admin-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+
+.admin-btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .btn {
   padding: 9px 18px;
@@ -301,35 +382,14 @@ header {
   transition: all 0.15s;
 }
 
-.btn-primary {
-  background: var(--accent);
-  color: #0d0f12;
-}
+.btn-primary   { background: var(--accent); color: #0d0f12; }
 .btn-primary:hover { filter: brightness(1.1); }
-
-.btn-danger {
-  background: transparent;
-  border: 1px solid #e05050;
-  color: #e05050;
-}
+.btn-danger    { background: transparent; border: 1px solid #e05050; color: #e05050; }
 .btn-danger:hover { background: rgba(224,80,80,0.1); }
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
+.btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
 .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
 
-/* Admin hint text */
-.admin-hint {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
-
-/* Timer duration launch row */
+/* Timer duration inputs */
 .timer-launch-row {
   display: flex;
   align-items: flex-end;
@@ -338,19 +398,8 @@ header {
   margin-bottom: 12px;
 }
 
-.dur-field {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.dur-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
+.dur-field { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dur-label { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
 
 .time-input {
   background: var(--surface);
@@ -369,7 +418,6 @@ header {
 .time-input:focus { border-color: var(--accent); }
 .time-sep { font-size: 1.4rem; color: var(--text-muted); padding-bottom: 22px; }
 
-/* Launch button */
 .btn-launch {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #0d0f12;
@@ -385,21 +433,8 @@ header {
 }
 .btn-launch:hover { filter: brightness(1.12); }
 
-/* Preset quick buttons */
-.preset-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.preset-label {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-right: 2px;
-}
+.preset-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.preset-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
 .btn-preset {
   background: var(--surface);
@@ -414,14 +449,109 @@ header {
 }
 .btn-preset:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Divider between admin sections */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 18px 0;
+.divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+/* Launch date input */
+.launch-date-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.date-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 9px 12px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+  flex: 1;
+  min-width: 200px;
 }
 
-/* ---- Loading overlay ---- */
+.date-input:focus { border-color: var(--accent); }
+.date-input::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+
+/* ---- Task Editor ---- */
+#task-editor-list { display: flex; flex-direction: column; gap: 8px; }
+
+.task-editor-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color 0.15s;
+}
+
+.task-editor-row:focus-within { border-color: var(--accent); }
+
+.task-editor-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--text-muted);
+  min-width: 20px;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.task-editor-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.task-editor-icon-preview { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.task-editor-icon-preview img { width: 28px; height: 28px; object-fit: contain; border-radius: 4px; }
+
+.task-editor-icon-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  width: 100px;
+  outline: none;
+  text-align: center;
+}
+
+.task-editor-icon-input:focus { border-color: var(--accent); }
+
+/* Label + tooltip stacked */
+.task-editor-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.task-editor-label-input,
+.task-editor-tooltip-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  padding: 7px 10px;
+  border-radius: 7px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.task-editor-label-input   { font-size: 0.9rem; }
+.task-editor-tooltip-input { font-size: 0.78rem; color: var(--text-muted); }
+.task-editor-label-input:focus,
+.task-editor-tooltip-input:focus { border-color: var(--accent); }
+
+.task-editor-remove {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  margin-top: 6px;
+}
+.task-editor-remove:hover { background: rgba(224,80,80,0.12); border-color: #e05050; color: #e05050; }
+
+/* ---- Loading ---- */
 #loading {
   position: fixed;
   inset: 0;
@@ -434,7 +564,6 @@ header {
   z-index: 999;
   transition: opacity 0.4s;
 }
-
 #loading.hidden { opacity: 0; pointer-events: none; }
 
 .spinner {
@@ -446,14 +575,9 @@ header {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+#loading p { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.1em; }
 
-#loading p {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-}
-
-/* ---- Toast notifications ---- */
+/* ---- Toast ---- */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -467,14 +591,10 @@ header {
   font-size: 0.85rem;
   opacity: 0;
   transition: all 0.3s;
-  z-index: 100;
+  z-index: 700;
   white-space: nowrap;
 }
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ---- Viewer badge ---- */
 .viewer-badge {
@@ -492,31 +612,17 @@ header {
   margin-bottom: 4px;
 }
 
-.admin-badge {
-  background: rgba(224,120,48,0.1);
-  border-color: var(--accent2);
-  color: var(--accent2);
-}
+.admin-badge { background: rgba(224,120,48,0.1); border-color: var(--accent2); color: var(--accent2); }
 
-/* ---- Responsive ---- */
-@media (max-width: 480px) {
-  body { padding: 16px 12px 40px; }
-  .task-item { padding: 14px 16px; }
-  .checklist-header { padding: 14px 16px; }
-}
-
-/* ============================================
+/* ========================
    PASSWORD GATE
-   ============================================ */
+   ======================== */
 #password-gate {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background: var(--bg);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 998;
-  padding: 24px;
+  align-items: center; justify-content: center;
+  z-index: 998; padding: 24px;
 }
 
 .pw-card {
@@ -524,46 +630,23 @@ header {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 36px 32px;
-  width: 100%;
-  max-width: 360px;
+  width: 100%; max-width: 360px;
   text-align: center;
   box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
 
-/* gold top line */
 .pw-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
   background: linear-gradient(90deg, var(--accent), var(--accent2));
 }
 
-.pw-icon {
-  font-size: 2.4rem;
-  margin-bottom: 12px;
-}
+.pw-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.pw-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.1em; color: var(--text); margin-bottom: 6px; }
+.pw-hint  { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
 
-.pw-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem;
-  letter-spacing: 0.1em;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-
-.pw-hint {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-}
-
-.pw-input-row {
-  display: flex;
-  gap: 8px;
-}
+.pw-input-row { display: flex; gap: 8px; }
 
 .pw-input {
   flex: 1;
@@ -577,78 +660,40 @@ header {
   outline: none;
   transition: border-color 0.15s;
 }
-
 .pw-input:focus { border-color: var(--accent); }
+.pw-error { margin-top: 12px; font-size: 0.8rem; color: #e05050; min-height: 18px; }
 
-.pw-error {
-  margin-top: 12px;
-  font-size: 0.8rem;
-  color: #e05050;
-  min-height: 18px;
-}
-
-/* shake animation for wrong password */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-8px); }
-  40%       { transform: translateX(8px); }
-  60%       { transform: translateX(-5px); }
-  80%       { transform: translateX(5px); }
+  0%,100%{ transform: translateX(0); }
+  20%    { transform: translateX(-8px); }
+  40%    { transform: translateX(8px); }
+  60%    { transform: translateX(-5px); }
+  80%    { transform: translateX(5px); }
 }
 .shake { animation: shake 0.45s ease; }
 
-/* ============================================
-   TASK PNG IMAGE ICON
-   ============================================ */
-.task-img {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-/* ============================================
-   LAUNCH COUNTDOWN OVERLAY  (viewer page)
-   ============================================ */
+/* ========================
+   LAUNCH COUNTDOWN OVERLAY
+   ======================== */
 #launch-overlay {
-  display: none; /* shown by JS via .active class */
-  position: fixed;
-  inset: 0;
+  display: none;
+  position: fixed; inset: 0;
   background: var(--bg);
   z-index: 990;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   padding: 24px;
   transition: opacity 0.6s;
 }
-
-#launch-overlay.active {
-  display: flex;
-}
-
-#launch-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
+#launch-overlay.active  { display: flex; }
+#launch-overlay.fade-out{ opacity: 0; pointer-events: none; }
 
 .launch-card {
-  width: 100%;
-  max-width: 520px;
+  width: 100%; max-width: 520px;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
+  display: flex; flex-direction: column; align-items: center;
 }
 
-.launch-eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
+.launch-eyebrow { font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
 
 .launch-title {
   font-family: 'Bebas Neue', sans-serif;
@@ -662,29 +707,11 @@ header {
   margin-bottom: 4px;
 }
 
-.launch-sub {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 28px;
-}
+.launch-sub { font-size: 0.82rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 28px; }
 
-/* DD:HH:MM:SS segments */
-.launch-countdown {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 40px;
-}
+.launch-countdown { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 40px; }
 
-.cd-seg {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
+.cd-seg { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .cd-seg span:first-child {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(2.4rem, 10vw, 4.2rem);
@@ -709,176 +736,34 @@ header {
   min-width: unset !important;
 }
 
-.cd-colon {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2rem, 8vw, 3.5rem);
-  color: var(--text-muted);
-  padding-top: 8px;
-  line-height: 1;
-}
+.cd-colon { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 8vw, 3.5rem); color: var(--text-muted); padding-top: 8px; line-height: 1; }
 
-/* Early-access password section */
 .launch-pw-section {
-  width: 100%;
-  max-width: 380px;
+  width: 100%; max-width: 380px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px 24px;
 }
+.launch-pw-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; }
 
-.launch-pw-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-/* ============================================
-   LAUNCH DATE INPUT  (admin panel)
-   ============================================ */
-.launch-date-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.date-input {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  padding: 9px 12px;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.15s;
-  flex: 1;
-  min-width: 200px;
-}
-
-.date-input:focus { border-color: var(--accent); }
-
-/* datetime-local calendar icon color fix for dark theme */
-.date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.7);
-  cursor: pointer;
-}
-
-/* ============================================
-   TASK EDITOR  (admin panel)
-   ============================================ */
-#task-editor-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.task-editor-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  transition: border-color 0.15s;
-}
-
-.task-editor-row:focus-within {
-  border-color: var(--accent);
-}
-
-.task-editor-num {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1rem;
-  color: var(--text-muted);
-  min-width: 20px;
-  text-align: center;
-}
-
-/* Icon preview + input stacked */
-.task-editor-icon-wrap {
+/* ========================
+   MAIN CONTENT wrapper
+   ======================== */
+#main-content {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
 }
 
-.task-editor-icon-preview {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-}
-
-.task-editor-icon-preview img {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.task-editor-icon-input {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.72rem;
-  padding: 4px 6px;
-  border-radius: 6px;
-  width: 110px;
-  outline: none;
-  text-align: center;
-}
-
-.task-editor-icon-input:focus { border-color: var(--accent); }
-
-/* Label input takes remaining space */
-.task-editor-label-input {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  padding: 8px 12px;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.task-editor-label-input:focus { border-color: var(--accent); }
-
-/* Remove row button */
-.task-editor-remove {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s;
-}
-
-.task-editor-remove:hover {
-  background: rgba(224, 80, 80, 0.12);
-  border-color: #e05050;
-  color: #e05050;
-}
-
-/* Responsive: stack icon wrap on small screens */
-@media (max-width: 480px) {
-  .task-editor-icon-input { width: 80px; }
+/* ========================
+   RESPONSIVE
+   ======================== */
+@media (max-width: 500px) {
+  body { padding: 14px 10px 40px; }
+  .task-item { padding: 12px 12px; gap: 8px; }
+  .task-timer-group { min-width: 64px; }
   .task-editor-row { flex-wrap: wrap; }
-  .task-editor-label-input { min-width: 100%; }
+  .task-editor-fields { min-width: 100%; }
 }
