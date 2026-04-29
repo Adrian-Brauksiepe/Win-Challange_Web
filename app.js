@@ -660,10 +660,6 @@ function renderTasks(tasks) {
     li.className = "task-item" + (task.checked?" checked":"");
     li.dataset.id = task.id;
 
-    const reactBtns = REACTION_EMOJIS.map(e =>
-      `<button class="react-btn" onclick="sendReaction(event,'${e}')" title="React">${e}</button>`
-    ).join("");
-
     li.innerHTML = `
       <div class="task-checkbox"
         ${IS_ADMIN ? `onclick="toggleTask(event,'${task.id}')" style="cursor:pointer"` : ""}>
