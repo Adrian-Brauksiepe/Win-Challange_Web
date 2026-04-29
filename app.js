@@ -29,8 +29,6 @@ const DEFAULT_TASKS = [
   { id:"task_12", label:"Nemo enim ipsam voluptatem quia voluptas",     icon:"📵", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
 ];
 
-// Reaction emojis shown per task
-const REACTION_EMOJIS = ["🔥","💪","👏","⚡","🏆"];
 
 // Difficulty config
 const DIFF = {
@@ -138,32 +136,6 @@ function injectFeatureStyles() {
       font-size:0.6rem; font-weight:700; letter-spacing:0.1em;
       text-transform:uppercase; padding:2px 7px;
       border-radius:99px; border:1px solid; flex-shrink:0; line-height:1.4;
-    }
-
-    /* ---- Per-task reaction buttons (right side of row) ---- */
-    .task-react-group {
-      display:flex; gap:3px; align-items:center; flex-shrink:0; margin-left:4px;
-    }
-    .react-btn {
-      background:none; border:none;
-      font-size:0.9rem; cursor:pointer; padding:2px 3px;
-      border-radius:6px; line-height:1;
-      transition:transform 0.1s;
-      opacity:0.45;
-    }
-    .react-btn:hover  { opacity:1; transform:scale(1.25); }
-    .react-btn:active { transform:scale(0.9); }
-
-    /* ---- Floating emoji animation ---- */
-    .float-emoji {
-      position:fixed; pointer-events:none; z-index:800;
-      font-size:1.7rem; user-select:none;
-      animation:floatUp 2.2s ease-out forwards;
-    }
-    @keyframes floatUp {
-      0%   { transform:translateY(0)    scale(1);    opacity:1; }
-      65%  { transform:translateY(-200px) scale(1.2); opacity:1; }
-      100% { transform:translateY(-300px) scale(0.8); opacity:0; }
     }
 
     /* ---- Sound toggle button ---- */
