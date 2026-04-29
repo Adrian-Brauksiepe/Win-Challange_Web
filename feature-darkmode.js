@@ -1,19 +1,3 @@
-cat > /mnt/user-data/outputs/win-challenge/feature-darkmode.js << 'ENDOFFILE'
-// ============================================
-// FEATURE: Dark / Light Mode Toggle
-// ============================================
-// HOW TO ADD THIS:
-//   1. Copy this file into your project folder
-//   2. In BOTH index.html AND admin.html, paste this
-//      line just before the closing </body> tag,
-//      AFTER the line that loads app.js:
-//
-//      <script src="feature-darkmode.js"></script>
-//
-// That's it. No other changes needed.
-// The user's preference is saved automatically.
-// ============================================
-
 (function () {
 
   // ---- Light theme CSS variable overrides ----
@@ -122,4 +106,3 @@ cat > /mnt/user-data/outputs/win-challenge/feature-darkmode.js << 'ENDOFFILE'
   else init();
 
 })();
-ENDOFFILE
