@@ -143,11 +143,6 @@
           // Only animate if the reaction arrived in the last 4 seconds (not historical)
           if (Date.now() - t > 4000) return;
 
-          // Update count display
-          counts[emoji] = (counts[emoji] || 0) + 1;
-          const countEl = document.getElementById('rc-' + encodeEmoji(emoji));
-          if (countEl) countEl.textContent = counts[emoji] > 99 ? '99+' : counts[emoji];
-
           // Animate floating emoji from random bottom position
           const x = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
           spawnFloating(emoji, x, window.innerHeight - 80);
