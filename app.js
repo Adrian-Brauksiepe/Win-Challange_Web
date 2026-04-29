@@ -1,4 +1,3 @@
-
 // ╔══════════════════════════════════════════════╗
 // ║   WIN CHALLENGE TRACKER  —  app.js           ║
 // ║   All features consolidated in one file      ║
@@ -7,7 +6,7 @@
 // ============================================================
 // CONFIG  —  change passwords here
 // ============================================================
-const ADMIN_PASSWORD = "0405";
+const ADMIN_PASSWORD = "win2024";
 
 // ============================================================
 // DEFAULT TASKS  —  edit label/icon/tooltip/difficulty here
@@ -28,6 +27,7 @@ const DEFAULT_TASKS = [
   { id:"task_11", label:"Laborum perspiciatis unde omnis iste natus",   icon:"🚶", tooltip:"", difficulty:"hard",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
   { id:"task_12", label:"Nemo enim ipsam voluptatem quia voluptas",     icon:"📵", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
 ];
+
 
 
 // Difficulty config
@@ -69,7 +69,7 @@ let prevCheckedCount   = -1;
 let launchCdInterval   = null;
 let audioCtx           = null;       // created lazily on first user gesture
 let soundEnabled       = localStorage.getItem("wc_sound") !== "off";
-let reactionSeenIds    = new Set();  // tracks reaction docs we've already animated
+
 
 // ============================================================
 // ██████████  INIT
@@ -137,6 +137,9 @@ function injectFeatureStyles() {
       text-transform:uppercase; padding:2px 7px;
       border-radius:99px; border:1px solid; flex-shrink:0; line-height:1.4;
     }
+
+
+
 
     /* ---- Sound toggle button ---- */
     #sound-toggle {
@@ -683,7 +686,6 @@ function renderTasks(tasks) {
           ${IS_ADMIN?`<button class="ttbtn ttbtn-reset" onclick="taskTimerReset(event,'${task.id}')" title="Reset timer">↺</button>`:""}
         </div>
       </div>
-      <div class="task-react-group">${reactBtns}</div>
     `;
     taskList.appendChild(li);
   });
