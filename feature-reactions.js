@@ -74,10 +74,6 @@
   styleEl.textContent = css;
   document.head.appendChild(styleEl);
 
-  // ---- Reaction counts tracked locally ----
-  const counts = {};
-  EMOJIS.forEach(e => counts[e] = 0);
-
   // ---- Inject HTML ----
   function injectHTML() {
     // Place the reaction bar above the checklist card
