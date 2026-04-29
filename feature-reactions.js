@@ -1,18 +1,3 @@
-cat > /mnt/user-data/outputs/win-challenge/feature-reactions.js << 'ENDOFFILE'
-// ============================================
-// FEATURE: Floating Emoji Reaction Bar
-// ============================================
-// HOW TO ADD THIS:
-//   1. Copy this file into your project folder
-//   2. In BOTH index.html AND admin.html, paste this
-//      line just before the closing </body> tag,
-//      AFTER the line that loads app.js:
-//
-//      <script src="feature-reactions.js"></script>
-//
-// That's it. No other changes needed.
-// ============================================
-
 (function () {
 
   const EMOJIS = ['🔥', '💪', '👏', '⚡', '🏆', '😤', '🎯', '💯'];
@@ -193,4 +178,3 @@ cat > /mnt/user-data/outputs/win-challenge/feature-reactions.js << 'ENDOFFILE'
   else init();
 
 })();
-ENDOFFILE
