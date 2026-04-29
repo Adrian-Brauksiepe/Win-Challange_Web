@@ -791,60 +791,6 @@ async function checkAll() {
 }
 
 // ============================================================
-// ██████████  REACTIONS  —  floating emoji only, no counters
-// ============================================================
-// sendReaction: called when user clicks a react button
-// Writes one doc to Firestore "reactions" collection.
-// Both sender AND all other viewers see the float animation
-// via the real-time listener below.
-// ============================================================
-async function sendReaction(e, emoji) {
-  e.stopPropagation();
-  // Immediate local float from click position
-  const rect = e.currentTarget.getBoundingClientRect();
-  spawnFloatingEmoji(emoji, rect.left+rect.width/2, rect.top);
-  // Write to Firestore so other viewers see it too
-  try { await db.collection("reactions").add({ emoji, t:Date.now() }); } catch(err) {}
-}
-
-function listenToReactions() {
-  db.collection("reactions")
-    .orderBy("t","desc").limit(40)
-    .onSnapshot(snap => {
-      snap.docChanges().forEach(change => {
-        if (change.type !== "added") return;
-        const id = change.doc.id;
-        if (reactionSeenIds.has(id)) return;
-        reactionSeenIds.add(id);
-        const { emoji, t } = change.doc.data();
-        // Only animate if received within last 5 seconds (not historical load)
-        if (Date.now()-t > 5000) return;
-        // Float from random position on screen
-        const x = Math.random()*window.innerWidth*0.8 + window.innerWidth*0.1;
-        spawnFloatingEmoji(emoji, x, window.innerHeight-80);
-      });
-    });
-
-  // Clean reactions older than 2 min every 90 seconds
-  setInterval(async ()=>{
-    try {
-      const old = await db.collection("reactions").where("t","<",Date.now()-120000).get();
-      old.docs.forEach(d=>d.ref.delete().catch(()=>{}));
-    } catch(e){}
-  }, 90000);
-}
-
-function spawnFloatingEmoji(emoji, x, y) {
-  const el = document.createElement("div");
-  el.className   = "float-emoji";
-  el.textContent = emoji;
-  el.style.left  = (x + (Math.random()-0.5)*50)+"px";
-  el.style.top   = y+"px";
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 2400);
-}
-
-// ============================================================
 // ██████████  TASK EDITOR  (admin)
 // ============================================================
 function renderTaskEditor(tasks) {
