@@ -1,6 +1,3 @@
-cat > /mnt/user-data/outputs/win-challenge/feature-viewer-count.js << 'ENDOFFILE'
-
-
 (function () {
 
   // ---- Inject CSS ----
@@ -106,4 +103,3 @@ cat > /mnt/user-data/outputs/win-challenge/feature-viewer-count.js << 'ENDOFFILE
   else init();
 
 })();
-ENDOFFILE
