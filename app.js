@@ -99,7 +99,6 @@ function startApp() {
     listenToSettings();
   } else {
     listenToLaunchGate();
-    listenToReactions();   // viewer sees floating reactions from others
   }
   listenToTasks();
   listenToTimer();
