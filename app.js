@@ -36,6 +36,18 @@ const DEFAULT_TASKS = [
 // Difficulty config
 const DIFF = {
   easy:   { label:"Easy",   color:"#48c774", bg:"rgba(72,199,116,0.13)"  },
+  medium: { label:"Medium", color:"#ffdd57", bg:"rgba(255,221,87,0.13)"  },
+  hard:   { label:"Hard",   color:"#ff6b6b", bg:"rgba(255,107,107,0.13)" },
+};
+const DIFF_WEIGHT = { easy:1, medium:2, hard:3 };
+
+const IS_ADMIN = window.location.pathname.includes("admin");
+
+// Firestore document paths
+const TASKS_DOC    = "winchallenge/tasks";
+const TIMER_DOC    = "winchallenge/timer";
+const SETTINGS_DOC = "winchallenge/settings";
+
 // ============================================================
 // DOM REFS
 // ============================================================
@@ -79,6 +91,10 @@ async function init() {
 
   if (IS_ADMIN) {
     document.body.classList.add("admin-mode");
+    if(sessionStorage.getItem("adminUnlocked")==="yes") { showAdminContent(); startApp(); }
+  } else {
+    startApp();
+  }
 }
 
 function startApp() {
@@ -456,10 +472,6 @@ function launchIconConfetti(icons, big=false) {
 
 // ============================================================
 // ██  SOUND ENGINE
-
-
-
-
 // ============================================================
 function unlockAudioOnGesture() {
   const unlock = () => {
@@ -590,9 +602,6 @@ function initSoundToggle() {
 
 // ============================================================
 // ██  LIVE VIEWER COUNT
-
-
-
 // ============================================================
 function initViewerCount() {
   let deviceId=localStorage.getItem("wc_device_id");
@@ -1465,11 +1474,19 @@ function renderTaskEditor(tasks){
     const row=document.createElement("div");
     row.className="task-editor-row";row.dataset.index=index;
     row.innerHTML=`
-
-
       <span class="task-editor-num">${index+1}</span>
       <div class="task-editor-icon-wrap">
         <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon(task.icon||task.emoji||"⭐")}</div>
+        <input class="task-editor-icon-input" type="text" value="${task.icon||task.emoji||""}"
+               placeholder="emoji or path" oninput="updateIconPreview(${index},this.value)" data-field="icon"/>
+      </div>
+      <div class="task-editor-fields">
+        <input class="task-editor-label-input" type="text" value="${escHtml(task.label||"")}" placeholder="Task description..." data-field="label"/>
+        <input class="task-editor-tooltip-input" type="text" value="${escHtml(task.tooltip||"")}" placeholder="Tooltip / hover info" data-field="tooltip"/>
+        <select class="task-editor-diff-select" data-field="difficulty">${diffOpts}</select>
+      </div>
+      <button class="task-editor-remove-btn" onclick="removeTaskRow(${index})" title="Remove">✕</button>
+    `;
     container.appendChild(row);
   });
 }
@@ -1510,22 +1527,24 @@ function addNewTask(){
   const row=document.createElement("div");
   row.className="task-editor-row";row.dataset.index=index;
   row.innerHTML=`
-
-
-
     <span class="task-editor-num">${index+1}</span>
     <div class="task-editor-icon-wrap">
       <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon("⭐")}</div>
+      <input class="task-editor-icon-input" type="text" value=""
+             placeholder="emoji or path"
              oninput="updateIconPreview(${index},this.value)" data-field="icon"/>
     </div>
     <div class="task-editor-fields">
       <input class="task-editor-label-input" type="text" value="" placeholder="Task description..." data-field="label"/>
       <input class="task-editor-tooltip-input" type="text" value="" placeholder="Tooltip / hover info" data-field="tooltip"/>
-
-
       <select class="task-editor-diff-select" data-field="difficulty">
         <option value="">── No Difficulty ──</option>
         <option value="easy">🟢 Easy (1pt)</option>
+        <option value="medium">🟡 Medium (2pt)</option>
+        <option value="hard">🔴 Hard (3pt)</option>
+      </select>
+    </div>
+    <button class="task-editor-remove-btn" onclick="removeTaskRow(${index})" title="Remove">✕</button>
   `;
   container.appendChild(row);
 }
