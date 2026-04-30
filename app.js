@@ -28,36 +28,16 @@ const CURSOR_AVATARS = [
 // ============================================================
 const DEFAULT_TASKS = [
   { id:"task_01", label:"Lorem ipsum dolor sit amet consectetur",      icon:"🔥", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_02", label:"Adipiscing elit sed do eiusmod tempor",        icon:"⚡", tooltip:"", difficulty:"easy",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_03", label:"Incididunt ut labore et dolore magna aliqua",  icon:"💪", tooltip:"", difficulty:"hard",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_04", label:"Ut enim ad minim veniam quis nostrud",         icon:"🎯", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_05", label:"Exercitation ullamco laboris nisi aliquip",    icon:"🏋️", tooltip:"", difficulty:"hard",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_06", label:"Duis aute irure dolor in reprehenderit",       icon:"📚", tooltip:"", difficulty:"easy",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_07", label:"Voluptate velit esse cillum dolore eu fugiat", icon:"🧘", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_08", label:"Nulla pariatur excepteur sint occaecat",       icon:"💧", tooltip:"", difficulty:"easy",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_09", label:"Cupidatat non proident sunt in culpa",         icon:"🥗", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_10", label:"Qui officia deserunt mollit anim id est",      icon:"😴", tooltip:"", difficulty:"easy",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-  { id:"task_11", label:"Laborum perspiciatis unde omnis iste natus",   icon:"🚶", tooltip:"", difficulty:"hard",   checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
+@@ -28,8 +41,6 @@ const DEFAULT_TASKS = [
   { id:"task_12", label:"Nemo enim ipsam voluptatem quia voluptas",     icon:"📵", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
 ];
+
+
 
 // Difficulty config
 const DIFF = {
   easy:   { label:"Easy",   color:"#48c774", bg:"rgba(72,199,116,0.13)"  },
-  medium: { label:"Medium", color:"#f0c040", bg:"rgba(240,192,64,0.13)"  },
-  hard:   { label:"Hard",   color:"#e07830", bg:"rgba(224,120,48,0.13)"  },
-};
-const DIFF_WEIGHT = { easy:1, medium:2, hard:3 };
-
-// ============================================================
-// FIRESTORE PATHS
-// ============================================================
-const TASKS_DOC    = "challenge/tasks";
-const TIMER_DOC    = "challenge/timer";
-const SETTINGS_DOC = "challenge/settings";
-
-const IS_ADMIN = window.location.pathname.includes("admin");
-
+@@ -50,34 +61,40 @@ const IS_ADMIN = window.location.pathname.includes("admin");
 // ============================================================
 // DOM REFS
 // ============================================================
@@ -98,25 +78,20 @@ async function init() {
 
   if (IS_ADMIN) {
     document.body.classList.add("admin-mode");
-    if (sessionStorage.getItem("adminUnlocked") === "yes") {
-      showAdminContent();
-      startApp();
-    } else {
-      if (loadingEl) loadingEl.classList.add("hidden");
-    }
-  } else {
-    startApp();
-  }
+@@ -93,68 +110,126 @@ async function init() {
 }
 
 function startApp() {
   if (IS_ADMIN) listenToSettings();
   else          listenToLaunchGate();
 
+
+
   listenToTasks();
   listenToTimer();
   startTaskTick();
   initViewerCount();
+
   injectViewerCountPill();
   injectDarkModeToggle();
   initSoundToggle();
@@ -233,8 +208,7 @@ function injectFeatureStyles() {
       background:var(--bg);
     }
     body.light-mode #bg-canvas { opacity:0.15; }
-    body.light-mode .timer-card,
-    body.light-mode .checklist-card,
+@@ -163,620 +238,1010 @@ function injectFeatureStyles() {
     body.light-mode .total-time-card,
     body.light-mode .admin-controls { box-shadow:0 2px 12px rgba(0,0,0,0.08); }
     #darkmode-toggle {
@@ -310,6 +284,7 @@ function injectFeatureStyles() {
       border-radius:50%;margin-top:2px;opacity:0.7;
     }
 
+
     /* ── Icon confetti particles ── */
     .icon-particle {
       position:fixed;pointer-events:none;z-index:500;
@@ -355,12 +330,14 @@ function initBackground() {
   const ctx = canvas.getContext("2d");
   let W, H, stars = [];
   function resize() { W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+
   function makeStars() {
     stars=[];
     const n=Math.floor((W*H)/9000);
     for(let i=0;i<n;i++) stars.push({
       x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+0.3,
       a:Math.random()*0.5+0.1,dx:(Math.random()-0.5)*0.12,dy:(Math.random()-0.5)*0.08,
+
       da:(Math.random()-0.5)*0.003
     });
   }
@@ -372,6 +349,7 @@ function initBackground() {
       if(s.x<0)s.x=W;if(s.x>W)s.x=0;if(s.y<0)s.y=H;if(s.y>H)s.y=0;
       ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
       ctx.fillStyle=`rgba(255,220,100,${s.a})`;ctx.fill();
+
     }
     requestAnimationFrame(draw);
   }
@@ -456,15 +434,22 @@ function launchIconConfetti(icons, big=false) {
 
 // ============================================================
 // ██  SOUND ENGINE
+
+
+
+
 // ============================================================
 function unlockAudioOnGesture() {
   const unlock = () => {
     if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     if(audioCtx.state==="suspended") audioCtx.resume();
+
+
   };
   document.addEventListener("click",   unlock, {once:true});
   document.addEventListener("touchend",unlock, {once:true});
 }
+
 function getAudioCtx() {
   if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==="suspended") audioCtx.resume();
@@ -483,6 +468,20 @@ function playTone(freq,type,dur,gain=0.25,offset=0){
     env.gain.exponentialRampToValueAtTime(0.001,t+dur);
     osc.start(t);osc.stop(t+dur+0.01);
   }catch(e){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 function playTick()       { playTone(880,"sine",0.12,0.25); }
 function playTimerStart() { playTone(660,"triangle",0.09,0.14); }
@@ -525,16 +524,20 @@ function playBoom() {
 // ============================================================
 // ██  DARK MODE
 // ============================================================
+
+
 function applyTheme() {
   document.body.classList.toggle("light-mode",!isDarkMode);
   const btn=document.getElementById("darkmode-toggle");
   if(btn) btn.textContent=isDarkMode?"☀️ Light":"🌙 Dark";
 }
+
 function toggleDarkMode() {
   isDarkMode=!isDarkMode;
   localStorage.setItem("wc_theme",isDarkMode?"dark":"light");
   applyTheme();
 }
+
 function injectDarkModeToggle() {
   const bar=document.querySelector(".status-bar");
   if(!bar||document.getElementById("darkmode-toggle")) return;
@@ -565,6 +568,9 @@ function initSoundToggle() {
 
 // ============================================================
 // ██  LIVE VIEWER COUNT
+
+
+
 // ============================================================
 function initViewerCount() {
   let deviceId=localStorage.getItem("wc_device_id");
@@ -742,6 +748,7 @@ function checkAdminPassword() {
     if(card){card.classList.add("shake");setTimeout(()=>card.classList.remove("shake"),500);}
   }
 }
+
 function showAdminContent() {
   const gate=document.getElementById("password-gate");
   const content=document.getElementById("admin-content");
@@ -791,6 +798,9 @@ function checkViewerPassword() {
   if(input.value===window._viewerPassword){
     sessionStorage.setItem("viewerUnlocked","yes");
     triggerShatterReveal();
+
+
+
   } else {
     error.textContent="❌ Wrong password";
     input.value="";input.focus();
@@ -931,6 +941,7 @@ async function clearLaunchDate(){
   if(!confirm("Remove the countdown? The site will be visible to everyone immediately.")) return;
   await db.doc(SETTINGS_DOC).set({launchMs:null},{merge:true});
   document.getElementById("launch-date-input").value="";
+
   showToast("✅ Countdown removed");
 }
 async function saveViewerPassword(){
@@ -939,6 +950,7 @@ async function saveViewerPassword(){
   await db.doc(SETTINGS_DOC).set({viewerPassword:pw},{merge:true});
   const st=document.getElementById("viewer-pw-status");
   if(st){st.textContent=pw?`✅ Password set to "${pw}"`:"✅ Password cleared";st.style.color="var(--success)";}
+
   showToast("🔓 Viewer password saved!");
 }
 
@@ -954,6 +966,8 @@ function listenToTasks(){
     } else {
       tasks=snap.data().tasks.map(t=>({
         timerMs:0,timerRunning:false,timerStartedAt:null,tooltip:"",difficulty:"",...t
+
+
       }));
     }
     currentTasks=tasks;
@@ -1089,6 +1103,18 @@ async function pinTask(taskId){
   try{ await db.doc(SETTINGS_DOC).set({pinnedTaskId:taskId},{merge:true}); }catch(e){}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 async function unpinTask(){
   pinnedTaskId=null;
   const existing=document.getElementById("pinned-task-card");
@@ -1167,10 +1193,12 @@ function attachTooltips(){
       const tip=e.currentTarget.dataset.tip;
       if(!tip||!tooltipEl) return;
       tooltipEl.textContent=tip;tooltipEl.classList.add("visible");
+
     });
     el.addEventListener("mousemove",e=>{
       if(!tooltipEl) return;
       tooltipEl.style.left=(e.clientX+12)+"px";tooltipEl.style.top=(e.clientY-8)+"px";
+
     });
     el.addEventListener("mouseleave",()=>{ if(tooltipEl) tooltipEl.classList.remove("visible"); });
   });
@@ -1183,10 +1211,12 @@ async function toggleTask(e,taskId){
   try{await db.doc(TASKS_DOC).set({tasks:updated});}catch{showToast("❌ Failed to save");}
 }
 async function taskTimerStart(e,taskId){
+
   e.stopPropagation();
   const task=currentTasks.find(t=>t.id===taskId);if(!task) return;
   const now=Date.now();let updated;
   if(task.timerRunning){
+
     playTimerStop();
     const elapsed=task.timerStartedAt?now-task.timerStartedAt:0;
     updated=currentTasks.map(t=>t.id===taskId
@@ -1194,10 +1224,12 @@ async function taskTimerStart(e,taskId){
   } else {
     playTimerStart();
     updated=currentTasks.map(t=>t.id===taskId?{...t,timerRunning:true,timerStartedAt:now}:t);
+
   }
   await db.doc(TASKS_DOC).set({tasks:updated});
 }
 async function taskTimerReset(e,taskId){
+
   e.stopPropagation();
   if(!confirm("Reset this task timer to 0?")) return;
   const updated=currentTasks.map(t=>t.id===taskId
@@ -1223,6 +1255,7 @@ async function resetTasks(){
 async function checkAll(){
   const snap=await db.doc(TASKS_DOC).get();if(!snap.exists)return;
   await db.doc(TASKS_DOC).set({tasks:snap.data().tasks.map(t=>({...t,checked:true}))});
+
   showToast("🎉 All tasks checked!");
 }
 
@@ -1242,28 +1275,19 @@ function renderTaskEditor(tasks){
     const row=document.createElement("div");
     row.className="task-editor-row";row.dataset.index=index;
     row.innerHTML=`
+
+
       <span class="task-editor-num">${index+1}</span>
       <div class="task-editor-icon-wrap">
         <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon(task.icon||task.emoji||"⭐")}</div>
-        <input class="task-editor-icon-input" type="text" value="${task.icon||task.emoji||""}"
-               placeholder="🔥 or icons/img.png"
-               oninput="updateIconPreview(${index},this.value)" data-field="icon"/>
-      </div>
-      <div class="task-editor-fields">
-        <input class="task-editor-label-input" type="text" value="${escHtml(task.label)}"
-               placeholder="Task description..." data-field="label"/>
-        <input class="task-editor-tooltip-input" type="text" value="${escHtml(task.tooltip||"")}"
-               placeholder="Tooltip / hover info (e.g. Save: 48 GB)" data-field="tooltip"/>
-        <select class="task-editor-diff-select" data-field="difficulty">${diffOpts}</select>
-      </div>
-      <button class="task-editor-remove" onclick="removeTaskRow(${index})" title="Remove">✕</button>
-    `;
+@@ -796,46 +1261,37 @@ function renderTaskEditor(tasks) {
     container.appendChild(row);
   });
 }
 function updateIconPreview(index,value){
   const p=document.getElementById(`preview-${index}`);
   if(p) p.innerHTML=renderIcon(value||"⭐");
+
 }
 async function saveEditedTasks(){
   const rows=document.querySelectorAll(".task-editor-row");
@@ -1271,6 +1295,11 @@ async function saveEditedTasks(){
   rows.forEach((row,i)=>{
     const get=f=>(row.querySelector(`[data-field='${f}']`)?.value||"").trim();
     const ex=currentTasks[i]||{};
+
+
+
+
+
     updated.push({
       id:             ex.id||(  "task_"+(Date.now()+i)),
       label:          get("label")      ||"Task",
@@ -1292,29 +1321,31 @@ function addNewTask(){
   const row=document.createElement("div");
   row.className="task-editor-row";row.dataset.index=index;
   row.innerHTML=`
+
+
+
     <span class="task-editor-num">${index+1}</span>
     <div class="task-editor-icon-wrap">
       <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon("⭐")}</div>
-      <input class="task-editor-icon-input" type="text" value=""
-             placeholder="🔥 or icons/img.png"
+@@ -844,10 +1300,8 @@ function addNewTask() {
              oninput="updateIconPreview(${index},this.value)" data-field="icon"/>
     </div>
     <div class="task-editor-fields">
       <input class="task-editor-label-input" type="text" value="" placeholder="Task description..." data-field="label"/>
       <input class="task-editor-tooltip-input" type="text" value="" placeholder="Tooltip / hover info" data-field="tooltip"/>
+
+
       <select class="task-editor-diff-select" data-field="difficulty">
         <option value="">── No Difficulty ──</option>
         <option value="easy">🟢 Easy (1pt)</option>
-        <option value="medium">🟡 Medium (2pt)</option>
-        <option value="hard">🔴 Hard (3pt)</option>
-      </select>
-    </div>
-    <button class="task-editor-remove" onclick="removeTaskRow(${index})" title="Remove">✕</button>
+@@ -859,132 +1313,119 @@ function addNewTask() {
   `;
   container.appendChild(row);
 }
 function removeTaskRow(index){
   const container=document.getElementById("task-editor-list");if(!container)return;
+
+
   container.querySelectorAll(".task-editor-row")[index]?.remove();
   container.querySelectorAll(".task-editor-row").forEach((r,i)=>{
     r.dataset.index=i;
@@ -1350,12 +1381,15 @@ function startChallengeCountdown(startMs,durationMs){
     const rem=Math.max(0,durationMs-(Date.now()-startMs));
     updateChallengeDisplay(Math.floor(rem/1000),durationMs);
     if(rem<=0) stopChallengeTimer();
+
   }
   tick();challengeInterval=setInterval(tick,1000);
+
 }
 function stopChallengeTimer(){
   if(challengeInterval) clearInterval(challengeInterval);
   challengeInterval=null;challengeStarted=false;
+
 }
 function updateChallengeDisplay(totalSeconds,durationMs){
   const h=Math.floor(totalSeconds/3600),m=Math.floor((totalSeconds%3600)/60),s=totalSeconds%60;
@@ -1364,6 +1398,7 @@ function updateChallengeDisplay(totalSeconds,durationMs){
   if(timerSubline){
     if(totalSeconds<=0){timerSubline.textContent="🏁 Time's up!";timerSubline.style.color="var(--accent2)";}
     else{timerSubline.textContent=`${Math.round(durationMs/3600000)}h challenge · counting down`;timerSubline.style.color="";}
+
   }
 }
 async function launchTimer(){
@@ -1373,12 +1408,14 @@ async function launchTimer(){
   if(durationMs<=0){showToast("⚠️ Set a duration first!");return;}
   const label=`${h>0?h+"h ":""}${m>0?m+"m":""}`.trim();
   if(!confirm(`Start a ${label} countdown for everyone?`)) return;
+
   stopChallengeTimer();
   await db.doc(TIMER_DOC).set({startMs:Date.now(),durationMs,running:true});
   showToast(`⏱ ${label} countdown started!`);
 }
 async function stopTimer(){
   if(!confirm("Pause the timer for all viewers?")) return;
+
   stopChallengeTimer();
   const snap=await db.doc(TIMER_DOC).get();if(!snap.exists)return;
   const{startMs,durationMs}=snap.data();
@@ -1391,10 +1428,12 @@ async function resumeTimer(){
   if(!snap.exists){showToast("Launch a timer first");return;}
   const{startMs,durationMs}=snap.data();
   await db.doc(TIMER_DOC).set({startMs,durationMs,running:true});
+
   showToast("▶️ Timer resumed");
 }
 async function resetTimer(){
   if(!confirm("Clear the timer completely?")) return;
+
   stopChallengeTimer();
   await db.doc(TIMER_DOC).delete();
   if(timerDisplay) timerDisplay.textContent="--:--:--";
@@ -1414,13 +1453,16 @@ function fmtMs(ms){
 function openMiniMode(){
   const url=window.location.href.replace(/admin\.html.*/,"index.html");
   const p=window.open(url,"WinChallengeMini",
+
     "width=340,height=560,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no");
   if(!p) showToast("Allow popups to use Mini Mode!");
 }
+
 let toastTimeout;
 function showToast(msg){
   const toast=document.getElementById("toast");if(!toast)return;
   toast.textContent=msg;toast.classList.add("show");
+
   clearTimeout(toastTimeout);
   toastTimeout=setTimeout(()=>toast.classList.remove("show"),2600);
 }
