@@ -66,6 +66,9 @@ let pinnedTaskId      = null;          // currently pinned task ID (from Firesto
 let selectedAvatarId  = localStorage.getItem("wc_avatar") || null;
 let cursorUpdateTimer = null;
 let remoteCursorEls   = {};            // map deviceId → DOM element
+let claimedAvatars    = {};            // map avatarId → deviceId (from Firestore)
+let cursorSize        = parseInt(localStorage.getItem("wc_cursor_size") || "40", 10);
+let cursorOpacity     = parseFloat(localStorage.getItem("wc_cursor_opacity") || "1");
 
 // ============================================================
 // ██  INIT
@@ -82,8 +85,8 @@ async function init() {
 }
 
 function startApp() {
-  if (IS_ADMIN) listenToSettings();
-  else          listenToLaunchGate();
+  if (IS_ADMIN) { listenToSettings(); injectCursorAppearanceControls(); }
+  else          { listenToLaunchGate(); listenToCursorAppearanceSettings(); }
 
 
 
@@ -99,6 +102,16 @@ function startApp() {
   listenToRemoteCursors();
 
   setTimeout(() => { if (loadingEl) loadingEl.classList.add("hidden"); }, 1000);
+}
+
+// Viewers: listen for admin cursor size/opacity changes
+function listenToCursorAppearanceSettings() {
+  db.doc(SETTINGS_DOC).onSnapshot(snap=>{
+    if(!snap.exists) return;
+    const {cursorSize:cs,cursorOpacity:co}=snap.data();
+    if(cs!==undefined && cs!==cursorSize){ cursorSize=cs; updateCursorStyles(); }
+    if(co!==undefined && co!==cursorOpacity){ cursorOpacity=co; updateCursorStyles(); }
+  });
 }
 
 // ============================================================
@@ -240,20 +253,31 @@ function injectFeatureStyles() {
     }
     .cursor-picker-row { display:flex;gap:6px; }
     .avatar-btn {
-      width:38px;height:38px;border-radius:50%;
+      width:44px;height:44px;border-radius:8px;
       border:2px solid var(--border);
-      background:var(--surface2);
+      background:transparent;
       cursor:pointer;overflow:hidden;
       display:flex;align-items:center;justify-content:center;
       font-size:1.2rem;
-      transition:border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      transition:border-color 0.2s, box-shadow 0.2s, transform 0.15s, opacity 0.2s;
+      position:relative;
     }
-    .avatar-btn img { width:100%;height:100%;object-fit:cover; }
-    .avatar-btn:hover  { border-color:var(--accent);transform:scale(1.1); }
+    .avatar-btn img { width:100%;height:100%;object-fit:contain; }
+    .avatar-btn:hover:not(.locked)  { border-color:var(--accent);transform:scale(1.1); }
     .avatar-btn.selected {
       border-color:var(--accent);
       box-shadow:0 0 10px rgba(240,192,64,0.7), 0 0 22px rgba(240,192,64,0.3);
       transform:scale(1.08);
+    }
+    .avatar-btn.locked {
+      opacity:0.35;cursor:not-allowed;
+      border-color:var(--border);
+    }
+    .avatar-btn.locked::after {
+      content:'🔒';
+      position:absolute;bottom:-2px;right:-2px;
+      font-size:0.6rem;line-height:1;
+      background:var(--surface);border-radius:4px;padding:1px 2px;
     }
 
     /* ── Local cursor follow ── */
@@ -263,7 +287,10 @@ function injectFeatureStyles() {
       font-size:1.6rem;line-height:1;
       display:none; /* shown once avatar is selected */
     }
-    #local-cursor img { width:28px;height:28px;object-fit:cover;border-radius:50%; }
+    #local-cursor img {
+      object-fit:contain;
+      /* no border-radius — use natural PNG shape */
+    }
 
     /* ── Remote cursors ── */
     .remote-cursor {
@@ -273,11 +300,10 @@ function injectFeatureStyles() {
       transition:left 0.12s linear, top 0.12s linear;
     }
     .remote-cursor-avatar {
-      width:30px;height:30px;border-radius:50%;
-      border:2px solid rgba(240,192,64,0.5);
-      object-fit:cover;font-size:1.3rem;
-      line-height:30px;text-align:center;
-      background:var(--surface2);
+      object-fit:contain;font-size:1.3rem;
+      line-height:1;text-align:center;
+      background:transparent;
+      /* no border, no border-radius — use natural PNG shape */
     }
     .remote-cursor-dot {
       width:6px;height:6px;background:var(--accent);
@@ -606,12 +632,14 @@ function injectViewerCountPill() {
 // ██  CURSOR AVATARS
 // ============================================================
 function initCursorAvatars() {
+  const myDeviceId = localStorage.getItem("wc_device_id") || "";
+
   // Inject picker UI
   const picker = document.createElement("div");
   picker.id = "cursor-picker";
   picker.innerHTML = `
     <span class="cursor-picker-label">Your cursor</span>
-    <div class="cursor-picker-row">
+    <div class="cursor-picker-row" id="avatar-btn-row">
       ${CURSOR_AVATARS.map(av=>`
         <button class="avatar-btn${selectedAvatarId===av.id?" selected":""}"
                 data-id="${av.id}"
@@ -633,6 +661,13 @@ function initCursorAvatars() {
   // Apply saved avatar
   if(selectedAvatarId) applyLocalAvatar(selectedAvatarId);
 
+  // Listen to avatar claims from Firestore
+  db.collection("avatarClaims").onSnapshot(snap=>{
+    claimedAvatars = {};
+    snap.docs.forEach(doc=>{ claimedAvatars[doc.id] = doc.data().deviceId; });
+    refreshAvatarPickerLocks(myDeviceId);
+  });
+
   // Mousemove → move local cursor + throttled Firestore update
   document.addEventListener("mousemove", e=>{
     const lc = document.getElementById("local-cursor");
@@ -646,10 +681,55 @@ function initCursorAvatars() {
   window.addEventListener("beforeunload",()=>removeCursorDoc());
 }
 
-function selectAvatar(id) {
+function refreshAvatarPickerLocks(myDeviceId) {
+  document.querySelectorAll(".avatar-btn").forEach(btn=>{
+    const id = btn.dataset.id;
+    const claimedBy = claimedAvatars[id];
+    const isMine = claimedBy === myDeviceId;
+    const isTaken = claimedBy && !isMine;
+    btn.classList.toggle("locked", isTaken);
+    btn.disabled = isTaken;
+    if(isTaken) btn.title = "Already taken by another player";
+    else {
+      const av = CURSOR_AVATARS.find(a=>a.id===id);
+      if(av) btn.title = av.fallback;
+    }
+  });
+}
+
+async function selectAvatar(id) {
+  const myDeviceId = localStorage.getItem("wc_device_id") || "";
+  const claimedBy = claimedAvatars[id];
+
+  // If taken by someone else, bail
+  if(claimedBy && claimedBy !== myDeviceId) {
+    showToast("🔒 That face is already taken!");
+    return;
+  }
+
+  // If re-selecting the same avatar, unselect/unclaim it
+  if(selectedAvatarId === id) {
+    try { await db.collection("avatarClaims").doc(id).delete(); } catch(e){}
+    selectedAvatarId = null;
+    localStorage.removeItem("wc_avatar");
+    document.querySelectorAll(".avatar-btn").forEach(btn=>btn.classList.remove("selected"));
+    const lc = document.getElementById("local-cursor");
+    if(lc) lc.style.display="none";
+    return;
+  }
+
+  // Release old claim if switching
+  if(selectedAvatarId) {
+    try { await db.collection("avatarClaims").doc(selectedAvatarId).delete(); } catch(e){}
+  }
+
+  // Claim new avatar
+  try {
+    await db.collection("avatarClaims").doc(id).set({ deviceId: myDeviceId });
+  } catch(e) {}
+
   selectedAvatarId = id;
-  localStorage.setItem("wc_avatar",id);
-  // Update picker UI
+  localStorage.setItem("wc_avatar", id);
   document.querySelectorAll(".avatar-btn").forEach(btn=>{
     btn.classList.toggle("selected", btn.dataset.id===id);
   });
@@ -663,7 +743,20 @@ function applyLocalAvatar(id) {
   lc.style.display="block";
   lc.innerHTML=`<img src="${av.src}" alt="${av.fallback}"
     onerror="this.style.display='none';this.parentNode.textContent='${av.fallback}'"
-    style="width:28px;height:28px;object-fit:cover;border-radius:50%;border:2px solid rgba(240,192,64,0.7);">`;
+    style="width:${cursorSize}px;height:${cursorSize}px;object-fit:contain;opacity:${cursorOpacity};">`;
+}
+
+function updateCursorStyles() {
+  // Update local cursor
+  const lc = document.getElementById("local-cursor");
+  if(lc) {
+    const img = lc.querySelector("img");
+    if(img) { img.style.width=cursorSize+"px"; img.style.height=cursorSize+"px"; img.style.opacity=cursorOpacity; }
+  }
+  // Update remote cursors
+  document.querySelectorAll(".remote-cursor-avatar").forEach(el=>{
+    if(el.tagName==="IMG") { el.style.width=cursorSize+"px"; el.style.height=cursorSize+"px"; el.style.opacity=cursorOpacity; }
+  });
 }
 
 async function uploadCursorPos(cx,cy) {
@@ -684,6 +777,10 @@ async function removeCursorDoc() {
   const deviceId=localStorage.getItem("wc_device_id");
   if(!deviceId) return;
   try{ await db.collection("cursors").doc(deviceId).delete(); }catch(e){}
+  // Also release avatar claim
+  if(selectedAvatarId) {
+    try{ await db.collection("avatarClaims").doc(selectedAvatarId).delete(); }catch(e){}
+  }
 }
 
 function listenToRemoteCursors() {
@@ -708,6 +805,7 @@ function listenToRemoteCursors() {
         const src=av?av.src:"";
         el.innerHTML=`
           <img class="remote-cursor-avatar" src="${src}" alt="${fb}"
+               style="width:${cursorSize}px;height:${cursorSize}px;opacity:${cursorOpacity};"
                onerror="this.style.display='none';this.parentNode.insertBefore(
                  Object.assign(document.createElement('span'),{className:'remote-cursor-avatar',textContent:'${fb}'}),this)">
           <div class="remote-cursor-dot"></div>
@@ -909,7 +1007,7 @@ function hideLaunchOverlay() {
 function listenToSettings() {
   db.doc(SETTINGS_DOC).onSnapshot(snap=>{
     if(!snap.exists) return;
-    const {launchMs,viewerPassword,pinnedTaskId:pid}=snap.data();
+    const {launchMs,viewerPassword,pinnedTaskId:pid,cursorSize:cs,cursorOpacity:co}=snap.data();
     const li=document.getElementById("launch-date-input");
     if(li&&launchMs){
       const d=new Date(launchMs);
@@ -928,6 +1026,24 @@ function listenToSettings() {
     // Pinned task from settings
     if(pid!==undefined) pinnedTaskId=pid||null;
     if(currentTasks.length) renderPinnedTask();
+
+    // Sync cursor appearance to admin sliders (don't override while dragging)
+    if(cs!==undefined && cs!==cursorSize){
+      cursorSize=cs;
+      const sl=document.getElementById("cursor-size-slider");
+      const lb=document.getElementById("cursor-size-val");
+      if(sl) sl.value=cs;
+      if(lb) lb.textContent=cs+"px";
+      updateCursorStyles();
+    }
+    if(co!==undefined && co!==cursorOpacity){
+      cursorOpacity=co;
+      const sl=document.getElementById("cursor-opacity-slider");
+      const lb=document.getElementById("cursor-opacity-val");
+      if(sl) sl.value=Math.round(co*100);
+      if(lb) lb.textContent=Math.round(co*100)+"%";
+      updateCursorStyles();
+    }
   });
 }
 
@@ -952,6 +1068,84 @@ async function saveViewerPassword(){
   if(st){st.textContent=pw?`✅ Password set to "${pw}"`:"✅ Password cleared";st.style.color="var(--success)";}
 
   showToast("🔓 Viewer password saved!");
+}
+
+// ============================================================
+// ██  ADMIN — CURSOR APPEARANCE SLIDERS
+// ============================================================
+function injectCursorAppearanceControls() {
+  // Only inject once, only on admin page
+  if(!IS_ADMIN) return;
+  if(document.getElementById("cursor-appearance-controls")) return;
+
+  // Find a good insertion point: after the admin-controls section or append to admin-content
+  const adminContent = document.getElementById("admin-content");
+  if(!adminContent) return;
+
+  const section = document.createElement("div");
+  section.id = "cursor-appearance-controls";
+  section.className = "admin-controls";
+  section.style.cssText = "margin-top:16px;";
+  section.innerHTML = `
+    <div class="admin-section-title" style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      🖱️ <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.08em;">Cursor Icon Appearance</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <label style="font-size:0.78rem;color:var(--text-muted);min-width:70px;">Size</label>
+        <input id="cursor-size-slider" type="range" min="20" max="100" value="${cursorSize}"
+               style="flex:1;accent-color:var(--accent);"
+               oninput="onCursorSizeChange(this.value)">
+        <span id="cursor-size-val" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent);min-width:36px;text-align:right;">${cursorSize}px</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <label style="font-size:0.78rem;color:var(--text-muted);min-width:70px;">Opacity</label>
+        <input id="cursor-opacity-slider" type="range" min="10" max="100" value="${Math.round(cursorOpacity*100)}"
+               style="flex:1;accent-color:var(--accent);"
+               oninput="onCursorOpacityChange(this.value)">
+        <span id="cursor-opacity-val" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent);min-width:36px;text-align:right;">${Math.round(cursorOpacity*100)}%</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        ${CURSOR_AVATARS.map(av=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <img src="${av.src}" style="width:${cursorSize}px;height:${cursorSize}px;object-fit:contain;opacity:${cursorOpacity};" id="cursor-preview-${av.id}"
+                 onerror="this.textContent='${av.fallback}'">
+            <span style="font-size:0.6rem;color:var(--text-muted);">${av.fallback}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+  adminContent.appendChild(section);
+}
+
+function onCursorSizeChange(val) {
+  cursorSize = parseInt(val, 10);
+  localStorage.setItem("wc_cursor_size", cursorSize);
+  const lbl = document.getElementById("cursor-size-val");
+  if(lbl) lbl.textContent = cursorSize+"px";
+  updateCursorStyles();
+  // Update previews in admin panel
+  CURSOR_AVATARS.forEach(av=>{
+    const el = document.getElementById("cursor-preview-"+av.id);
+    if(el) { el.style.width=cursorSize+"px"; el.style.height=cursorSize+"px"; }
+  });
+  // Sync to Firestore so all viewers pick it up
+  db.doc(SETTINGS_DOC).set({cursorSize, cursorOpacity},{merge:true}).catch(()=>{});
+}
+
+function onCursorOpacityChange(val) {
+  cursorOpacity = parseInt(val, 10) / 100;
+  localStorage.setItem("wc_cursor_opacity", cursorOpacity);
+  const lbl = document.getElementById("cursor-opacity-val");
+  if(lbl) lbl.textContent = Math.round(cursorOpacity*100)+"%";
+  updateCursorStyles();
+  // Update previews in admin panel
+  CURSOR_AVATARS.forEach(av=>{
+    const el = document.getElementById("cursor-preview-"+av.id);
+    if(el) el.style.opacity = cursorOpacity;
+  });
+  db.doc(SETTINGS_DOC).set({cursorSize, cursorOpacity},{merge:true}).catch(()=>{});
 }
 
 // ============================================================
