@@ -91,7 +91,16 @@ async function init() {
 
   if (IS_ADMIN) {
     document.body.classList.add("admin-mode");
-    if(sessionStorage.getItem("adminUnlocked")==="yes") { showAdminContent(); startApp(); }
+    // Hide the loading spinner so the password gate becomes visible
+    const loadingEl2 = document.getElementById("loading");
+    if (loadingEl2) loadingEl2.classList.add("hidden");
+    // If already authenticated this session, skip straight past the gate
+    if (sessionStorage.getItem("adminUnlocked") === "yes") {
+      showAdminContent();
+      startApp();
+    }
+    // Otherwise the password gate HTML is already shown —
+    // checkAdminPassword() calls showAdminContent() + startApp() on success.
   } else {
     startApp();
   }
