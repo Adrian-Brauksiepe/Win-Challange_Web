@@ -28,7 +28,6 @@ const CURSOR_AVATARS = [
 // ============================================================
 const DEFAULT_TASKS = [
   { id:"task_01", label:"Lorem ipsum dolor sit amet consectetur",      icon:"🔥", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
-@@ -28,8 +41,6 @@ const DEFAULT_TASKS = [
   { id:"task_12", label:"Nemo enim ipsam voluptatem quia voluptas",     icon:"📵", tooltip:"", difficulty:"medium", checked:false, timerMs:0, timerRunning:false, timerStartedAt:null },
 ];
 
@@ -37,7 +36,6 @@ const DEFAULT_TASKS = [
 // Difficulty config
 const DIFF = {
   easy:   { label:"Easy",   color:"#48c774", bg:"rgba(72,199,116,0.13)"  },
-@@ -50,34 +61,40 @@ const IS_ADMIN = window.location.pathname.includes("admin");
 // ============================================================
 // DOM REFS
 // ============================================================
@@ -81,7 +79,6 @@ async function init() {
 
   if (IS_ADMIN) {
     document.body.classList.add("admin-mode");
-@@ -93,68 +110,126 @@ async function init() {
 }
 
 function startApp() {
@@ -221,7 +218,6 @@ function injectFeatureStyles() {
       background:var(--bg);
     }
     body.light-mode #bg-canvas { opacity:0.15; }
-@@ -163,620 +238,1010 @@ function injectFeatureStyles() {
     body.light-mode .total-time-card,
     body.light-mode .admin-controls { box-shadow:0 2px 12px rgba(0,0,0,0.08); }
     #darkmode-toggle {
@@ -1474,7 +1470,6 @@ function renderTaskEditor(tasks){
       <span class="task-editor-num">${index+1}</span>
       <div class="task-editor-icon-wrap">
         <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon(task.icon||task.emoji||"⭐")}</div>
-@@ -796,46 +1261,37 @@ function renderTaskEditor(tasks) {
     container.appendChild(row);
   });
 }
@@ -1521,7 +1516,6 @@ function addNewTask(){
     <span class="task-editor-num">${index+1}</span>
     <div class="task-editor-icon-wrap">
       <div class="task-editor-icon-preview" id="preview-${index}">${renderIcon("⭐")}</div>
-@@ -844,10 +1300,8 @@ function addNewTask() {
              oninput="updateIconPreview(${index},this.value)" data-field="icon"/>
     </div>
     <div class="task-editor-fields">
@@ -1532,7 +1526,6 @@ function addNewTask(){
       <select class="task-editor-diff-select" data-field="difficulty">
         <option value="">── No Difficulty ──</option>
         <option value="easy">🟢 Easy (1pt)</option>
-@@ -859,132 +1313,119 @@ function addNewTask() {
   `;
   container.appendChild(row);
 }
